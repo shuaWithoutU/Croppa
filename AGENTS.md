@@ -9,6 +9,13 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 - Prefer the smallest change that advances the current PRD milestone.
 - Update the PRD decision log when an approved product or architecture decision materially changes.
 
+## Incremental delivery and review
+
+- Split work into small, reviewable stages aligned with the current PRD milestone. Do not attempt an entire multi-stage feature in one response by default.
+- At the end of each stage, report the behavior implemented, files changed, checks run, and any open decisions, then wait for Shua's review and confirmation before continuing.
+- Continue without a review checkpoint only when Shua explicitly asks for uninterrupted, autonomous, or end-to-end work.
+- Leave each stage buildable and internally coherent whenever practical; finish an in-progress atomic change before pausing if stopping would leave the repository broken.
+
 ## Privacy invariants
 
 - Never upload, persist, cache, log, or include in analytics any captured pixels, OCR source text, user-corrected text, or translated text.
@@ -33,13 +40,23 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 - Keep captured image data out of global state and persistent stores. Pass it only through the active processing request.
 - Use stable request/session identifiers to prevent late asynchronous results from replacing a newer capture.
 
-## UX and accessibility
+## UI and UX preferences and patterns
 
-- Preserve the direct flow: toolbar or shortcut, drag one region, then receive an English overlay.
-- Result actions remain Copy, Edit source, Retry, and Close unless the PRD changes.
-- Follow system light/dark preference and reduced-motion preference.
+- Use a minimalist utility style inspired by the Windows Snipping Tool: compact controls, clear labels, restrained decoration, and no unnecessary screens or persistent chrome.
+- Preserve the direct interaction pattern: toolbar button or shortcut, drag one region, show a local processing state, then replace the selected text with an English overlay.
+- Render the result as a solid, opaque card over the selected region. Do not use transparency or attempt to reconstruct the original background.
+- Keep result actions predictable and ordered as Copy, Edit source, Retry, and Close unless the PRD changes. Make the primary action visually clear without overpowering the translation.
+- Follow the operating system's light/dark preference and reduced-motion preference. Use a restrained accent color and maintain consistent spacing, radii, typography, focus treatment, and status feedback across extension surfaces.
+- Keep selection, processing, success, and error feedback close to the selected region so the user does not lose context.
 - Keep all controls after region selection keyboard operable, visibly focused, properly labelled, and readable at WCAG 2.2 AA contrast.
 - Errors must be concise and actionable. Never expose stack traces or captured content to users.
+- Isolate injected UI from webpage styles and scripts with Shadow DOM, while keeping the popup and options pages visually consistent with the in-page overlay.
+
+## Function comments
+
+- Add a concise TSDoc or JSDoc comment immediately before important functions, including extension entry points, cross-context message handlers, capture and cleanup operations, privacy-sensitive storage logic, OCR/translation orchestration, and non-obvious geometry or state-management code.
+- Describe the function's purpose and, when relevant, its inputs, output, side effects, invariants, lifecycle expectations, or important tradeoffs.
+- Do not add comments that merely repeat the function name or narrate straightforward implementation details. Small self-explanatory helpers do not require comments.
 
 ## Quality gates
 
@@ -59,5 +76,6 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 ## Git workflow
 
 - Keep commits small and milestone-oriented with imperative messages.
+- Before every commit, recommend one or more concise messages for the staged change and ask Shua to choose or approve the exact message. Never commit until a message is explicitly approved; a message Shua supplies with the commit instruction counts as approval.
 - Before committing or pushing, inspect the staged diff, scan for secrets and captured test content, and run the relevant quality gates.
 - Never push a change that violates the privacy invariants even if the feature otherwise works.
