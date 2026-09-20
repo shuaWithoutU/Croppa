@@ -27,7 +27,14 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) =>
     return false;
   }
 
-  void handleMessage(message, sender).then(sendResponse);
+  void handleMessage(message, sender).then(sendResponse, (error: unknown) => {
+    sendResponse(
+      errorResult(
+        'PROCESSING_FAILED',
+        getSafeErrorMessage(error, 'Croppa could not complete the requested operation.'),
+      ),
+    );
+  });
   return true;
 });
 
@@ -91,11 +98,13 @@ async function handleMessage(
   }
 
   if (message.type === 'PREPARE_MODELS') {
-    return sendToProcessor({
+    const result = await sendToProcessor({
       target: 'processor',
       type: 'PROCESS_PREPARE',
       sessionId: message.sessionId,
     });
+    await storeModelPreparationResult(result);
+    return result;
   }
 
   const tabId = sender.tab?.id;
@@ -157,6 +166,15 @@ async function sendToProcessor(message: ProcessorRequest): Promise<OperationResu
     });
     return errorResult('PROCESSING_FAILED', safeMessage);
   }
+}
+
+/** Persists only model readiness metadata returned by the offscreen processor. */
+async function storeModelPreparationResult(result: OperationResult): Promise<void> {
+  await chrome.storage.local.set({
+    [STORAGE_KEYS.modelReady]: result.ok,
+    [STORAGE_KEYS.modelVersion]: MODEL_VERSION,
+    [STORAGE_KEYS.lastModelError]: result.ok ? '' : result.error,
+  });
 }
 
 async function ensureOffscreenDocument(): Promise<void> {

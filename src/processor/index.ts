@@ -17,8 +17,6 @@ import {
   type ProcessingStage,
   type ProcessorRequest,
 } from '../shared/messages';
-import { MODEL_VERSION, STORAGE_KEYS } from '../shared/storage';
-
 const TRANSLATION_MODEL = 'Xenova/opus-mt-zh-en';
 
 let ocrWorkerPromise: Promise<Worker> | undefined;
@@ -38,13 +36,17 @@ chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse) =
     () => undefined,
     () => undefined,
   );
-  void task.then(sendResponse);
+  void task.then(sendResponse, (error: unknown) => {
+    sendResponse(errorResult('PROCESSING_FAILED', getSafeErrorMessage(error)));
+  });
   return true;
 });
 
+/** Configures packaged WebAssembly assets without caching extension-scheme URLs. */
 function configureLocalRuntime(): void {
   env.allowLocalModels = false;
   env.useBrowserCache = true;
+  env.useWasmCache = false;
   const wasm = env.backends.onnx.wasm;
   if (!wasm) {
     throw new Error('The local WebAssembly translation runtime is unavailable.');
@@ -101,21 +103,13 @@ async function handleProcessorRequest(message: ProcessorRequest): Promise<Operat
     };
   } catch (error) {
     const safeMessage = getSafeErrorMessage(error);
-    await chrome.storage.local.set({
-      [STORAGE_KEYS.modelReady]: false,
-      [STORAGE_KEYS.lastModelError]: safeMessage,
-    });
     return errorResult('PROCESSING_FAILED', safeMessage);
   }
 }
 
+/** Initializes the packaged OCR runtime and cached translation pipeline in parallel. */
 async function prepareModels(sessionId: string): Promise<void> {
   await Promise.all([getOcrWorker(sessionId), getTranslator(sessionId)]);
-  await chrome.storage.local.set({
-    [STORAGE_KEYS.modelReady]: true,
-    [STORAGE_KEYS.modelVersion]: MODEL_VERSION,
-    [STORAGE_KEYS.lastModelError]: '',
-  });
 }
 
 async function getOcrWorker(sessionId: string): Promise<Worker> {

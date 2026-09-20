@@ -19,6 +19,11 @@ export function App() {
         if (!active) return;
         setState(result.modelsReady ? 'ready' : result.lastError ? 'error' : 'idle');
         setError(result.lastError ?? '');
+      })
+      .catch(() => {
+        if (!active) return;
+        setState('error');
+        setError('Croppa could not read the model status. Reload the extension and try again.');
       });
 
     return () => {
@@ -26,20 +31,28 @@ export function App() {
     };
   }, []);
 
+  /** Starts local model preparation and always restores the UI from its loading state. */
   async function prepareModels() {
     setState('preparing');
     setError('');
-    const result = (await chrome.runtime.sendMessage({
-      target: 'background',
-      type: 'PREPARE_MODELS',
-      sessionId: crypto.randomUUID(),
-    })) as OperationResult;
 
-    if (result.ok) {
-      setState('ready');
-    } else {
+    try {
+      const result = (await chrome.runtime.sendMessage({
+        target: 'background',
+        type: 'PREPARE_MODELS',
+        sessionId: crypto.randomUUID(),
+      })) as OperationResult;
+
+      if (result.ok) {
+        setState('ready');
+        return;
+      }
+
       setState('error');
       setError(result.error);
+    } catch {
+      setState('error');
+      setError('Croppa lost contact with its local processor. Reload the extension and try again.');
     }
   }
 
