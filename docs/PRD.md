@@ -2,23 +2,24 @@
 
 ## 1. Document control
 
-| Field | Value |
-|---|---|
-| Product | Croppa |
-| Version | 0.1 |
-| Status | Draft for final approval |
-| Date | 2026-09-20 |
-| Product owner | Shua |
-| Contributors | Shua, Codex |
-| Approver | Shua |
-| Repository target | Public GitHub repository |
-| Project location | `D:/PersonalProjects/Croppa` |
+| Field             | Value                        |
+| ----------------- | ---------------------------- |
+| Product           | Croppa                       |
+| Version           | 0.2                          |
+| Status            | Approved for implementation  |
+| Date              | 2026-09-20                   |
+| Product owner     | Shua                         |
+| Contributors      | Shua, Codex                  |
+| Approver          | Shua                         |
+| Repository target | Public GitHub repository     |
+| Project location  | `D:/PersonalProjects/Croppa` |
 
 ### Revision history
 
-| Version | Date | Change |
-|---|---|---|
-| 0.1 | 2026-09-20 | Initial PRD based on the approved discovery summary. |
+| Version | Date       | Change                                                           |
+| ------- | ---------- | ---------------------------------------------------------------- |
+| 0.1     | 2026-09-20 | Initial PRD based on the approved discovery summary.             |
+| 0.2     | 2026-09-20 | Discovery approved; provisional M1 technical decisions recorded. |
 
 ## 2. Executive summary
 
@@ -50,22 +51,22 @@ The long-term vision is to detect and replace every supported text region in the
 
 ### Product outcomes
 
-| Goal | Metric | Baseline | MVP target | Measurement method | Window | Owner |
-|---|---|---:|---:|---|---|---|
-| Make visual Chinese text understandable | Clear samples producing understandable English without manual OCR correction | No Croppa workflow | At least 16 of 20 samples | Product-owner review of the representative acceptance set | Before MVP release | Shua |
-| Reduce translation workflow friction | Required user actions from initiation to visible result | Multi-application manual workflow | Start capture, select region, receive result | End-to-end usability test | Before MVP release | Shua |
-| Keep processing responsive | Time from completed selection to translated overlay after models are ready | Not available | Target 2-3 seconds; documented rather than release-blocking for MVP | Timed test on the primary development computer | Before MVP release | Shua |
-| Protect captured content | Captures or extracted text transmitted or retained | Not available | Zero transmissions and zero retained session content | Network inspection and storage inspection | Every release | Shua |
-| Remain free to use | Required paid services or subscriptions | Not available | None | Dependency and runtime review | Every release | Shua |
+| Goal                                    | Metric                                                                       |                          Baseline |                                                          MVP target | Measurement method                                        | Window             | Owner |
+| --------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------: | ------------------------------------------------------------------: | --------------------------------------------------------- | ------------------ | ----- |
+| Make visual Chinese text understandable | Clear samples producing understandable English without manual OCR correction |                No Croppa workflow |                                           At least 16 of 20 samples | Product-owner review of the representative acceptance set | Before MVP release | Shua  |
+| Reduce translation workflow friction    | Required user actions from initiation to visible result                      | Multi-application manual workflow |                        Start capture, select region, receive result | End-to-end usability test                                 | Before MVP release | Shua  |
+| Keep processing responsive              | Time from completed selection to translated overlay after models are ready   |                     Not available | Target 2-3 seconds; documented rather than release-blocking for MVP | Timed test on the primary development computer            | Before MVP release | Shua  |
+| Protect captured content                | Captures or extracted text transmitted or retained                           |                     Not available |                Zero transmissions and zero retained session content | Network inspection and storage inspection                 | Every release      | Shua  |
+| Remain free to use                      | Required paid services or subscriptions                                      |                     Not available |                                                                None | Dependency and runtime review                             | Every release      | Shua  |
 
 ### Operational health metrics
 
-| Metric | MVP target |
-|---|---|
-| Successful capture initiation on supported ordinary web pages | 100% in the supported-page test set |
-| Clear user-facing handling of restricted or unsupported pages | 100% of tested restricted-page cases |
-| Unhandled errors during the 20-sample acceptance run | 0 |
-| Accessibility checks on Croppa controls | No known critical keyboard, focus, label, or contrast failures |
+| Metric                                                        | MVP target                                                     |
+| ------------------------------------------------------------- | -------------------------------------------------------------- |
+| Successful capture initiation on supported ordinary web pages | 100% in the supported-page test set                            |
+| Clear user-facing handling of restricted or unsupported pages | 100% of tested restricted-page cases                           |
+| Unhandled errors during the 20-sample acceptance run          | 0                                                              |
+| Accessibility checks on Croppa controls                       | No known critical keyboard, focus, label, or contrast failures |
 
 Performance and translation quality depend on the selected models, source image, and client hardware. The feasibility milestone must establish realistic reference measurements before the release candidate.
 
@@ -109,10 +110,10 @@ The initial user is a desktop reader who encounters Simplified Chinese in manga,
 
 ### Stakeholders and decision ownership
 
-| Stakeholder | Role |
-|---|---|
-| Shua | Product owner, developer, primary tester, final approver, and maintainer |
-| Portfolio viewers | Secondary audience evaluating project quality and engineering decisions |
+| Stakeholder       | Role                                                                        |
+| ----------------- | --------------------------------------------------------------------------- |
+| Shua              | Product owner, developer, primary tester, final approver, and maintainer    |
+| Portfolio viewers | Secondary audience evaluating project quality and engineering decisions     |
 | Open-source users | Possible future users and contributors; not required for initial validation |
 
 ## 8. Assumptions, dependencies, and constraints
@@ -233,79 +234,79 @@ The initial user is a desktop reader who encounters Simplified Chinese in manga,
 
 ### Prioritization
 
-| Capability | Priority | Rationale |
-|---|---|---|
-| Single-region capture | Must | Core interaction |
-| Simplified Chinese OCR | Must | Core source language |
-| Chinese-to-English translation | Must | Core outcome |
-| Horizontal and vertical text | Must | Required for manga and websites |
-| Local processing and zero content upload | Must | Privacy and zero-cost promise |
-| Replacement result card | Must | Keeps translation in reading context |
-| Edit, retry, copy, and close | Must | Required recovery and utility actions |
-| Opera GX and Chrome support | Must | Selected browsers |
-| First-use model experience | Must | Required by local inference architecture |
-| Keyboard command | Should | Faster repeated use; browser manages assignment |
-| Japanese support | Should | Desired next language if feasibility is favorable |
-| Korean support | Could | Desired later language |
-| Full-viewport multi-region translation | Could | Long-term product goal, too complex for MVP |
-| Browser-store publishing | Won't for MVP | Not required and may introduce fees or review work |
-| Saved images and history | Won't for MVP | No demonstrated need and conflicts with data minimization |
+| Capability                               | Priority      | Rationale                                                 |
+| ---------------------------------------- | ------------- | --------------------------------------------------------- |
+| Single-region capture                    | Must          | Core interaction                                          |
+| Simplified Chinese OCR                   | Must          | Core source language                                      |
+| Chinese-to-English translation           | Must          | Core outcome                                              |
+| Horizontal and vertical text             | Must          | Required for manga and websites                           |
+| Local processing and zero content upload | Must          | Privacy and zero-cost promise                             |
+| Replacement result card                  | Must          | Keeps translation in reading context                      |
+| Edit, retry, copy, and close             | Must          | Required recovery and utility actions                     |
+| Opera GX and Chrome support              | Must          | Selected browsers                                         |
+| First-use model experience               | Must          | Required by local inference architecture                  |
+| Keyboard command                         | Should        | Faster repeated use; browser manages assignment           |
+| Japanese support                         | Should        | Desired next language if feasibility is favorable         |
+| Korean support                           | Could         | Desired later language                                    |
+| Full-viewport multi-region translation   | Could         | Long-term product goal, too complex for MVP               |
+| Browser-store publishing                 | Won't for MVP | Not required and may introduce fees or review work        |
+| Saved images and history                 | Won't for MVP | No demonstrated need and conflicts with data minimization |
 
 ## 11. Functional requirements
 
 ### Capture and selection
 
-| ID | Priority | Requirement | Acceptance criteria |
-|---|---|---|---|
-| FR-001 | Must | Croppa must expose a toolbar action that starts selection mode on the active supported tab. | Given a supported active page, when the toolbar action is invoked, then a selection layer appears without navigating or reloading the page. |
-| FR-002 | Should | Croppa must define a browser extension command for starting selection mode. | Given an assigned shortcut, when it is invoked on a supported page, then the same selection flow as FR-001 begins. |
-| FR-003 | Must | Selection mode must allow the user to drag a rectangular region within the visible viewport. | Given selection mode, when the user drags and releases over a valid area, then Croppa records the rectangle accurately relative to the captured viewport. |
-| FR-004 | Must | The user must be able to cancel selection without processing. | Given selection mode, when the user presses Escape or uses the cancel interaction, then the layer is removed and no capture is retained. |
-| FR-005 | Must | Croppa must reject or safely handle an empty or impractically small selection. | Given an invalid selection, when the pointer is released, then Croppa shows concise guidance or returns to selection without invoking OCR. |
-| FR-006 | Must | Croppa must capture only the selected portion of the currently visible active tab. | Network and storage inspection must show that the cropped image remains local and is released after the session ends. |
+| ID     | Priority | Requirement                                                                                  | Acceptance criteria                                                                                                                                       |
+| ------ | -------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-001 | Must     | Croppa must expose a toolbar action that starts selection mode on the active supported tab.  | Given a supported active page, when the toolbar action is invoked, then a selection layer appears without navigating or reloading the page.               |
+| FR-002 | Should   | Croppa must define a browser extension command for starting selection mode.                  | Given an assigned shortcut, when it is invoked on a supported page, then the same selection flow as FR-001 begins.                                        |
+| FR-003 | Must     | Selection mode must allow the user to drag a rectangular region within the visible viewport. | Given selection mode, when the user drags and releases over a valid area, then Croppa records the rectangle accurately relative to the captured viewport. |
+| FR-004 | Must     | The user must be able to cancel selection without processing.                                | Given selection mode, when the user presses Escape or uses the cancel interaction, then the layer is removed and no capture is retained.                  |
+| FR-005 | Must     | Croppa must reject or safely handle an empty or impractically small selection.               | Given an invalid selection, when the pointer is released, then Croppa shows concise guidance or returns to selection without invoking OCR.                |
+| FR-006 | Must     | Croppa must capture only the selected portion of the currently visible active tab.           | Network and storage inspection must show that the cropped image remains local and is released after the session ends.                                     |
 
 ### Model setup and readiness
 
-| ID | Priority | Requirement | Acceptance criteria |
-|---|---|---|---|
-| FR-007 | Must | Croppa must detect whether required OCR and translation assets are ready before processing. | When an asset is absent or invalid, capture processing does not begin silently; setup or repair guidance is shown. |
-| FR-008 | Must | Croppa must disclose the expected model download and display progress where the underlying APIs expose it. | A first-time user sees purpose, size or an explicit unknown-size notice, status, and completion or failure. |
-| FR-009 | Must | The user must be able to cancel or retry a failed model download. | Cancellation stops pending work where technically possible; retry starts a clean recovery attempt. |
-| FR-010 | Must | Successfully acquired models must be cached locally when supported. | Restarting the browser does not require a repeat download when the cache remains valid. |
+| ID     | Priority | Requirement                                                                                                | Acceptance criteria                                                                                                |
+| ------ | -------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| FR-007 | Must     | Croppa must detect whether required OCR and translation assets are ready before processing.                | When an asset is absent or invalid, capture processing does not begin silently; setup or repair guidance is shown. |
+| FR-008 | Must     | Croppa must disclose the expected model download and display progress where the underlying APIs expose it. | A first-time user sees purpose, size or an explicit unknown-size notice, status, and completion or failure.        |
+| FR-009 | Must     | The user must be able to cancel or retry a failed model download.                                          | Cancellation stops pending work where technically possible; retry starts a clean recovery attempt.                 |
+| FR-010 | Must     | Successfully acquired models must be cached locally when supported.                                        | Restarting the browser does not require a repeat download when the cache remains valid.                            |
 
 ### OCR and translation
 
-| ID | Priority | Requirement | Acceptance criteria |
-|---|---|---|---|
-| FR-011 | Must | Croppa must recognize printed Simplified Chinese from the selected image. | The approved acceptance set meets the quality target in Section 5. |
-| FR-012 | Must | Croppa must process both horizontal and vertical source text. | The acceptance set contains both orientations and completes without an orientation-specific crash or unusable output. |
-| FR-013 | Must | Croppa must support a single word, phrase, or multi-line sentence within one selected region. | Each content length appears in the acceptance set and returns an English result or a clear recognition error. |
-| FR-014 | Must | Croppa must translate recognized Simplified Chinese into natural English locally. | Runtime network inspection shows no source image or text sent to a translation service. |
-| FR-015 | Must | Croppa must preserve meaning, names, punctuation intent, and dialogue tone as far as the selected model permits. | Product-owner review classifies at least 16 of 20 clear samples as understandable without source correction. |
-| FR-016 | Must | Croppa must show an explicit no-text or processing-failure state rather than an empty translation card. | A blank and an unreadable sample each produce actionable feedback. |
+| ID     | Priority | Requirement                                                                                                      | Acceptance criteria                                                                                                   |
+| ------ | -------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| FR-011 | Must     | Croppa must recognize printed Simplified Chinese from the selected image.                                        | The approved acceptance set meets the quality target in Section 5.                                                    |
+| FR-012 | Must     | Croppa must process both horizontal and vertical source text.                                                    | The acceptance set contains both orientations and completes without an orientation-specific crash or unusable output. |
+| FR-013 | Must     | Croppa must support a single word, phrase, or multi-line sentence within one selected region.                    | Each content length appears in the acceptance set and returns an English result or a clear recognition error.         |
+| FR-014 | Must     | Croppa must translate recognized Simplified Chinese into natural English locally.                                | Runtime network inspection shows no source image or text sent to a translation service.                               |
+| FR-015 | Must     | Croppa must preserve meaning, names, punctuation intent, and dialogue tone as far as the selected model permits. | Product-owner review classifies at least 16 of 20 clear samples as understandable without source correction.          |
+| FR-016 | Must     | Croppa must show an explicit no-text or processing-failure state rather than an empty translation card.          | A blank and an unreadable sample each produce actionable feedback.                                                    |
 
 ### Results and recovery
 
-| ID | Priority | Requirement | Acceptance criteria |
-|---|---|---|---|
-| FR-017 | Must | Croppa must show a processing indicator associated with the selected region. | From selection completion until result or failure, visible feedback communicates that work is active. |
-| FR-018 | Must | Croppa must render the English result in an opaque card covering the selected rectangle. | The result is positioned over the source region, has no transparency, and remains readable in both themes. |
-| FR-019 | Must | The result card must provide Copy, Edit source, Retry, and Close actions. | Each action is visible or keyboard discoverable and performs the behavior defined in this PRD. |
-| FR-020 | Must | Copy must place only the English translation on the clipboard and give brief success feedback. | Pasting after Copy yields the displayed English text without labels or source text. |
-| FR-021 | Must | Edit source must allow correction of the OCR text and retranslate without a new capture. | Submitting edited source updates the translation and leaves the chosen selection region intact. |
-| FR-022 | Must | Retry must repeat applicable processing for the current selection. | A retry replaces the previous status/result and does not create overlapping cards. |
-| FR-023 | Must | Close must remove the card and release capture, OCR, and translation session data. | The page returns to its prior interactive state and no session content remains in extension storage. |
-| FR-024 | Must | Croppa must keep at most one active selection/result session per tab in the MVP. | Starting a new capture closes or replaces the previous Croppa session predictably. |
+| ID     | Priority | Requirement                                                                                    | Acceptance criteria                                                                                        |
+| ------ | -------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| FR-017 | Must     | Croppa must show a processing indicator associated with the selected region.                   | From selection completion until result or failure, visible feedback communicates that work is active.      |
+| FR-018 | Must     | Croppa must render the English result in an opaque card covering the selected rectangle.       | The result is positioned over the source region, has no transparency, and remains readable in both themes. |
+| FR-019 | Must     | The result card must provide Copy, Edit source, Retry, and Close actions.                      | Each action is visible or keyboard discoverable and performs the behavior defined in this PRD.             |
+| FR-020 | Must     | Copy must place only the English translation on the clipboard and give brief success feedback. | Pasting after Copy yields the displayed English text without labels or source text.                        |
+| FR-021 | Must     | Edit source must allow correction of the OCR text and retranslate without a new capture.       | Submitting edited source updates the translation and leaves the chosen selection region intact.            |
+| FR-022 | Must     | Retry must repeat applicable processing for the current selection.                             | A retry replaces the previous status/result and does not create overlapping cards.                         |
+| FR-023 | Must     | Close must remove the card and release capture, OCR, and translation session data.             | The page returns to its prior interactive state and no session content remains in extension storage.       |
+| FR-024 | Must     | Croppa must keep at most one active selection/result session per tab in the MVP.               | Starting a new capture closes or replaces the previous Croppa session predictably.                         |
 
 ### Settings and failure handling
 
-| ID | Priority | Requirement | Acceptance criteria |
-|---|---|---|---|
-| FR-025 | Must | Croppa must follow the operating system or browser light/dark preference automatically. | Changing the relevant system preference changes Croppa's theme on the next supported update without losing settings. |
-| FR-026 | Should | Croppa settings must explain how to assign the browser-managed keyboard command. | A user can reach or follow browser-specific instructions without searching the project source. |
-| FR-027 | Must | Croppa must detect and explain unsupported or restricted pages. | Tested browser-internal, extension-store, or otherwise blocked pages produce a clear message with no stuck overlay. |
-| FR-028 | Must | Croppa must provide actionable states for model, OCR, translation, permission, clipboard, and unexpected failures. | Each simulated failure is distinguishable and provides retry, correction, or dismissal where appropriate. |
-| FR-029 | Must | Croppa must persist only settings and approved cached model assets. | Storage inspection after closing all overlays finds no screenshots, recognized source text, or translations. |
+| ID     | Priority | Requirement                                                                                                        | Acceptance criteria                                                                                                  |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| FR-025 | Must     | Croppa must follow the operating system or browser light/dark preference automatically.                            | Changing the relevant system preference changes Croppa's theme on the next supported update without losing settings. |
+| FR-026 | Should   | Croppa settings must explain how to assign the browser-managed keyboard command.                                   | A user can reach or follow browser-specific instructions without searching the project source.                       |
+| FR-027 | Must     | Croppa must detect and explain unsupported or restricted pages.                                                    | Tested browser-internal, extension-store, or otherwise blocked pages produce a clear message with no stuck overlay.  |
+| FR-028 | Must     | Croppa must provide actionable states for model, OCR, translation, permission, clipboard, and unexpected failures. | Each simulated failure is distinguishable and provides retry, correction, or dismissal where appropriate.            |
+| FR-029 | Must     | Croppa must persist only settings and approved cached model assets.                                                | Storage inspection after closing all overlays finds no screenshots, recognized source text, or translations.         |
 
 ## 12. UX and UI requirements
 
@@ -353,13 +354,13 @@ The Croppa interface and generated output are English-only for the MVP. Source t
 
 Croppa has no server-side data model. The conceptual client-side entities are:
 
-| Entity | Contents | Persistence |
-|---|---|---|
-| `UserSettings` | Theme mode behavior, setup completion, language configuration, and non-sensitive UI preferences | Local extension storage |
-| `ModelMetadata` | Model identifiers, versions, readiness, cache references, size, and license metadata | Local extension storage/cache |
-| `CaptureSession` | Tab identifier, viewport information, selection rectangle, and transient cropped image | Memory only; delete on close/failure/replacement |
-| `OCRResult` | Recognized source text, confidence data if available, orientation, and user correction | Memory only |
-| `TranslationResult` | English result and transient processing status | Memory only |
+| Entity              | Contents                                                                                        | Persistence                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `UserSettings`      | Theme mode behavior, setup completion, language configuration, and non-sensitive UI preferences | Local extension storage                          |
+| `ModelMetadata`     | Model identifiers, versions, readiness, cache references, size, and license metadata            | Local extension storage/cache                    |
+| `CaptureSession`    | Tab identifier, viewport information, selection rectangle, and transient cropped image          | Memory only; delete on close/failure/replacement |
+| `OCRResult`         | Recognized source text, confidence data if available, orientation, and user correction          | Memory only                                      |
+| `TranslationResult` | English result and transient processing status                                                  | Memory only                                      |
 
 ### Data rules
 
@@ -375,13 +376,13 @@ Captures and derived text are potentially sensitive user content even though Cro
 
 ## 14. Integrations and external interfaces
 
-| Integration | Purpose | Data sent | Authentication | Failure behavior | Cost and privacy |
-|---|---|---|---|---|---|
-| Chromium extension APIs | Toolbar, active-tab capture, content injection, storage, commands, and clipboard-related behavior | Only browser-internal data necessary for the action | Browser-managed extension permissions | Explain unsupported pages or missing permissions | No service fee; request minimum permissions |
-| OCR runtime and language data | Convert the cropped image to Simplified Chinese text | Image remains within the extension runtime | None | Show no-text or OCR failure with retry/edit options | Open-source; license must be reviewed |
-| Translation runtime and model | Convert source text to natural English | Text remains within the extension runtime | None | Show translation failure and retry/edit options | Open-source; license and model size must be reviewed |
-| Trusted model host | Download model assets | Standard asset request metadata; no captures or extracted text | Normally none | Show download status and retry; never fall back to uploading content | Must remain free and have acceptable terms |
-| GitHub | Source repository, documentation, issues, and release packages | Project materials only | Maintainer account for publishing | Local build remains usable if GitHub is unavailable | Public repository; no runtime dependency for installed use after setup |
+| Integration                   | Purpose                                                                                           | Data sent                                                      | Authentication                        | Failure behavior                                                     | Cost and privacy                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Chromium extension APIs       | Toolbar, active-tab capture, content injection, storage, commands, and clipboard-related behavior | Only browser-internal data necessary for the action            | Browser-managed extension permissions | Explain unsupported pages or missing permissions                     | No service fee; request minimum permissions                            |
+| OCR runtime and language data | Convert the cropped image to Simplified Chinese text                                              | Image remains within the extension runtime                     | None                                  | Show no-text or OCR failure with retry/edit options                  | Open-source; license must be reviewed                                  |
+| Translation runtime and model | Convert source text to natural English                                                            | Text remains within the extension runtime                      | None                                  | Show translation failure and retry/edit options                      | Open-source; license and model size must be reviewed                   |
+| Trusted model host            | Download model assets                                                                             | Standard asset request metadata; no captures or extracted text | Normally none                         | Show download status and retry; never fall back to uploading content | Must remain free and have acceptable terms                             |
+| GitHub                        | Source repository, documentation, issues, and release packages                                    | Project materials only                                         | Maintainer account for publishing     | Local build remains usable if GitHub is unavailable                  | Public repository; no runtime dependency for installed use after setup |
 
 No external OCR, translation, analytics, advertising, identity, payment, email, or database service is permitted in the MVP.
 
@@ -427,22 +428,22 @@ This is context rather than a fixed code architecture. The technical feasibility
 
 ## 16. Non-functional requirements
 
-| ID | Category | Requirement and threshold |
-|---|---|---|
-| NFR-001 | Performance | After required models are loaded, Croppa should target a translated overlay within 3 seconds for a representative single-region sample on the primary development computer. Missing the target is documented and investigated but is not automatically release-blocking for MVP. |
-| NFR-002 | Responsiveness | The page and Croppa controls must remain responsive enough to cancel or close during ordinary processing; expensive work should not block the page's main thread where worker execution is feasible. |
-| NFR-003 | Privacy | Zero captured images, recognized text, corrected text, or translations may be transmitted to any external service. |
-| NFR-004 | Retention | Session content must be removed from Croppa-controlled storage and memory references when the session closes, is cancelled, fails terminally, or is replaced. |
-| NFR-005 | Cost | Core installation and use must require no paid API, subscription, hosted backend, or browser-store purchase. Internet and hardware costs are outside product scope. |
-| NFR-006 | Compatibility | All Must-priority workflows must pass on current stable Chrome and the installed current Opera GX version on Windows 10/11 at release time. Exact tested versions must be recorded in release notes. |
-| NFR-007 | Accessibility | Croppa UI must have no known critical keyboard, focus, accessible-name, or WCAG 2.2 AA contrast failure at release. The free-form drag gesture may use a pointer; equivalent exact keyboard region drawing is not required for MVP. |
-| NFR-008 | Reliability | A failed capture, OCR, translation, or model request must not leave an uncancellable selection layer, duplicate overlay, or permanently modified page state. |
-| NFR-009 | Security | Croppa must request only permissions justified by an implemented feature and must not use dynamic remote executable code. |
-| NFR-010 | Maintainability | Formatting, linting, type checking, unit tests, and production build commands must be automated and documented. |
-| NFR-011 | Observability | User-facing errors and optional local development logs must support diagnosis without storing or printing captured content or recognized/translated text by default. |
-| NFR-012 | Model transparency | Before first download, Croppa must state that models are downloaded locally and disclose known size, source, and license through the UI or linked documentation. |
-| NFR-013 | Storage | Croppa must detect and report model-storage failures without repeatedly downloading in a loop. |
-| NFR-014 | Recovery | Retrying a failed operation must not require reinstalling the extension unless local assets are irrecoverably invalid; repair/reset instructions must exist for that case. |
+| ID      | Category           | Requirement and threshold                                                                                                                                                                                                                                                        |
+| ------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NFR-001 | Performance        | After required models are loaded, Croppa should target a translated overlay within 3 seconds for a representative single-region sample on the primary development computer. Missing the target is documented and investigated but is not automatically release-blocking for MVP. |
+| NFR-002 | Responsiveness     | The page and Croppa controls must remain responsive enough to cancel or close during ordinary processing; expensive work should not block the page's main thread where worker execution is feasible.                                                                             |
+| NFR-003 | Privacy            | Zero captured images, recognized text, corrected text, or translations may be transmitted to any external service.                                                                                                                                                               |
+| NFR-004 | Retention          | Session content must be removed from Croppa-controlled storage and memory references when the session closes, is cancelled, fails terminally, or is replaced.                                                                                                                    |
+| NFR-005 | Cost               | Core installation and use must require no paid API, subscription, hosted backend, or browser-store purchase. Internet and hardware costs are outside product scope.                                                                                                              |
+| NFR-006 | Compatibility      | All Must-priority workflows must pass on current stable Chrome and the installed current Opera GX version on Windows 10/11 at release time. Exact tested versions must be recorded in release notes.                                                                             |
+| NFR-007 | Accessibility      | Croppa UI must have no known critical keyboard, focus, accessible-name, or WCAG 2.2 AA contrast failure at release. The free-form drag gesture may use a pointer; equivalent exact keyboard region drawing is not required for MVP.                                              |
+| NFR-008 | Reliability        | A failed capture, OCR, translation, or model request must not leave an uncancellable selection layer, duplicate overlay, or permanently modified page state.                                                                                                                     |
+| NFR-009 | Security           | Croppa must request only permissions justified by an implemented feature and must not use dynamic remote executable code.                                                                                                                                                        |
+| NFR-010 | Maintainability    | Formatting, linting, type checking, unit tests, and production build commands must be automated and documented.                                                                                                                                                                  |
+| NFR-011 | Observability      | User-facing errors and optional local development logs must support diagnosis without storing or printing captured content or recognized/translated text by default.                                                                                                             |
+| NFR-012 | Model transparency | Before first download, Croppa must state that models are downloaded locally and disclose known size, source, and license through the UI or linked documentation.                                                                                                                 |
+| NFR-013 | Storage            | Croppa must detect and report model-storage failures without repeatedly downloading in a loop.                                                                                                                                                                                   |
+| NFR-014 | Recovery           | Retrying a failed operation must not require reinstalling the extension unless local assets are irrecoverably invalid; repair/reset instructions must exist for that case.                                                                                                       |
 
 ## 17. Security, privacy, and compliance
 
@@ -571,62 +572,62 @@ Croppa will not collect product analytics or remote telemetry in the MVP.
 
 No fixed calendar deadline is set. Work should proceed as soon as practical while maintaining the release gates.
 
-| Milestone | Outcome | Entry criteria | Exit criteria | Dependencies | Owner |
-|---|---|---|---|---|---|
-| M1: Feasibility spike | Evidence that local OCR and translation can meet an acceptable baseline | PRD approved | Models selected provisionally; horizontal/vertical samples run; download size, latency, quality, license, and browser constraints documented; go/no-go decision made | Sample inputs and candidate models | Shua |
-| M2: Capture foundation | Reliable single-region capture in Chrome and Opera GX | M1 go decision | Toolbar capture, rectangle selection, cancellation, crop accuracy, and unsupported-page handling demonstrated | Chromium APIs | Shua |
-| M3: Translation MVP | End-to-end capture-to-English result | M2 complete | OCR, translation, processing state, and solid replacement card work for representative samples | OCR and translation runtimes | Shua |
-| M4: Recovery and polish | Usable and accessible workflow | M3 complete | Edit, retry, copy, close, theming, first-run setup, errors, cleanup, and accessibility requirements implemented | UI design and storage behavior | Shua |
-| M5: Cross-browser validation | Release candidate validated | M4 complete | Automated checks and Chrome/Opera acceptance runs pass; privacy and permission checks pass | Test dataset | Shua |
-| M6: Portfolio release | Public, reproducible project | M5 complete | Documentation, licensing, notices, package, screenshots/demo, tag, and GitHub release published | GitHub access and approved visibility | Shua |
+| Milestone                    | Outcome                                                                 | Entry criteria | Exit criteria                                                                                                                                                        | Dependencies                          | Owner |
+| ---------------------------- | ----------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----- |
+| M1: Feasibility spike        | Evidence that local OCR and translation can meet an acceptable baseline | PRD approved   | Models selected provisionally; horizontal/vertical samples run; download size, latency, quality, license, and browser constraints documented; go/no-go decision made | Sample inputs and candidate models    | Shua  |
+| M2: Capture foundation       | Reliable single-region capture in Chrome and Opera GX                   | M1 go decision | Toolbar capture, rectangle selection, cancellation, crop accuracy, and unsupported-page handling demonstrated                                                        | Chromium APIs                         | Shua  |
+| M3: Translation MVP          | End-to-end capture-to-English result                                    | M2 complete    | OCR, translation, processing state, and solid replacement card work for representative samples                                                                       | OCR and translation runtimes          | Shua  |
+| M4: Recovery and polish      | Usable and accessible workflow                                          | M3 complete    | Edit, retry, copy, close, theming, first-run setup, errors, cleanup, and accessibility requirements implemented                                                      | UI design and storage behavior        | Shua  |
+| M5: Cross-browser validation | Release candidate validated                                             | M4 complete    | Automated checks and Chrome/Opera acceptance runs pass; privacy and permission checks pass                                                                           | Test dataset                          | Shua  |
+| M6: Portfolio release        | Public, reproducible project                                            | M5 complete    | Documentation, licensing, notices, package, screenshots/demo, tag, and GitHub release published                                                                      | GitHub access and approved visibility | Shua  |
 
 Optional language and full-viewport work begins only after the MVP release unless M1 shows it can be included with negligible scope and risk.
 
 ## 22. Risks and mitigations
 
-| Risk | Category | Likelihood | Impact | Mitigation | Contingency or trigger | Owner |
-|---|---|---:|---:|---|---|---|
-| Vertical or stylized text has poor OCR accuracy | Product/ML | High | High | Test early with representative samples; evaluate preprocessing and orientation settings | If acceptance target is unreachable, narrow documented font/background support while retaining manual correction | Shua |
-| Translation model is too large or slow | Technical/UX | Medium | High | Compare quantized browser-compatible candidates during M1 | Choose a smaller model, accept documented latency, or reconsider a user-supplied free service only through a new approved PRD revision | Shua |
-| Model output is unnatural or inaccurate | Product/ML | Medium | High | Use natural-English evaluation samples and retain source editing | Document limitations or replace the model before release | Shua |
-| Opera GX lacks a required Chromium behavior | Compatibility | Medium | High | Test every architectural spike in both browsers from M1 onward | Add an adapter, narrow the affected capability, or make Chrome the temporary reference browser with explicit approval | Shua |
-| Manifest V3 worker lifecycle interrupts processing | Technical | Medium | High | Design resumable state transitions and test long model operations early | Move permitted work to an extension document/worker context or revise component boundaries | Shua |
-| Remote model loading violates packaging or policy expectations | Compliance | Medium | High | Review Manifest V3 remote-code rules and distinguish executable assets from model data | Bundle approved assets, document manual acquisition, or replace the model pipeline | Shua |
-| Model or language-data license is incompatible with public distribution | Legal | Medium | High | Complete license review before adoption | Replace the asset; do not publish it in a release |
-| Model download or storage is too large | UX/Technical | Medium | Medium | Disclose size, show progress, cache assets, and evaluate quantization | Split optional languages, require on-demand download, or choose smaller assets | Shua |
-| Overlay covers artwork or does not fit translation | UX | High | Medium | Use a clear opaque card, practical minimum size, and controlled overflow | Allow repositioning or sizing in a later release if user testing shows need | Shua |
-| Page navigation or scrolling misaligns the overlay | UX/Technical | Medium | Medium | Define explicit close/reposition behavior and test layout changes | Close the active result safely when reliable repositioning is unavailable | Shua |
-| Test data cannot be redistributed | Legal | Medium | Medium | Keep private test samples out of Git and include only owned or redistributable fixtures | Publish aggregate results without the restricted samples | Shua |
-| Page content interferes with Croppa UI | Security/UX | Medium | Medium | Isolate DOM and styling; sanitize all rendered text | Close safely and report unsupported conflicts | Shua |
+| Risk                                                                    | Category      | Likelihood | Impact | Mitigation                                                                              | Contingency or trigger                                                                                                                 | Owner |
+| ----------------------------------------------------------------------- | ------------- | ---------: | -----: | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Vertical or stylized text has poor OCR accuracy                         | Product/ML    |       High |   High | Test early with representative samples; evaluate preprocessing and orientation settings | If acceptance target is unreachable, narrow documented font/background support while retaining manual correction                       | Shua  |
+| Translation model is too large or slow                                  | Technical/UX  |     Medium |   High | Compare quantized browser-compatible candidates during M1                               | Choose a smaller model, accept documented latency, or reconsider a user-supplied free service only through a new approved PRD revision | Shua  |
+| Model output is unnatural or inaccurate                                 | Product/ML    |     Medium |   High | Use natural-English evaluation samples and retain source editing                        | Document limitations or replace the model before release                                                                               | Shua  |
+| Opera GX lacks a required Chromium behavior                             | Compatibility |     Medium |   High | Test every architectural spike in both browsers from M1 onward                          | Add an adapter, narrow the affected capability, or make Chrome the temporary reference browser with explicit approval                  | Shua  |
+| Manifest V3 worker lifecycle interrupts processing                      | Technical     |     Medium |   High | Design resumable state transitions and test long model operations early                 | Move permitted work to an extension document/worker context or revise component boundaries                                             | Shua  |
+| Remote model loading violates packaging or policy expectations          | Compliance    |     Medium |   High | Review Manifest V3 remote-code rules and distinguish executable assets from model data  | Bundle approved assets, document manual acquisition, or replace the model pipeline                                                     | Shua  |
+| Model or language-data license is incompatible with public distribution | Legal         |     Medium |   High | Complete license review before adoption                                                 | Replace the asset; do not publish it in a release                                                                                      |
+| Model download or storage is too large                                  | UX/Technical  |     Medium | Medium | Disclose size, show progress, cache assets, and evaluate quantization                   | Split optional languages, require on-demand download, or choose smaller assets                                                         | Shua  |
+| Overlay covers artwork or does not fit translation                      | UX            |       High | Medium | Use a clear opaque card, practical minimum size, and controlled overflow                | Allow repositioning or sizing in a later release if user testing shows need                                                            | Shua  |
+| Page navigation or scrolling misaligns the overlay                      | UX/Technical  |     Medium | Medium | Define explicit close/reposition behavior and test layout changes                       | Close the active result safely when reliable repositioning is unavailable                                                              | Shua  |
+| Test data cannot be redistributed                                       | Legal         |     Medium | Medium | Keep private test samples out of Git and include only owned or redistributable fixtures | Publish aggregate results without the restricted samples                                                                               | Shua  |
+| Page content interferes with Croppa UI                                  | Security/UX   |     Medium | Medium | Isolate DOM and styling; sanitize all rendered text                                     | Close safely and report unsupported conflicts                                                                                          | Shua  |
 
 ## 23. Open questions and deferred decisions
 
-| ID | Question or decision | Impact | Owner | Due point | Status |
-|---|---|---|---|---|---|
-| OQ-001 | Which exact OCR runtime version and Simplified Chinese language data provide the best size/quality tradeoff? | Accuracy, licensing, and download size | Shua | M1 exit | Open |
-| OQ-002 | Which exact local Chinese-to-English model and runtime meet quality, license, size, and browser requirements? | Core feasibility | Shua | M1 exit | Open |
-| OQ-003 | What preprocessing and orientation strategy is required for vertical manga text? | OCR quality and latency | Shua | M1 exit | Open |
-| OQ-004 | What are the exact model download and installed-cache sizes? | First-run UX and storage | Shua | M1 exit | Open |
-| OQ-005 | How will model assets be hosted or packaged within Manifest V3 and relevant distribution policies? | Security, compliance, and release packaging | Shua | Before M3 | Open |
-| OQ-006 | What result-card overflow behavior works best for translations longer than the selected region? | Usability | Shua | Before M4 | Open |
-| OQ-007 | Should scrolling reposition the overlay or close the active session? | UX consistency and implementation complexity | Shua | Before M4 | Open |
-| OQ-008 | What exact current Chrome and Opera GX versions establish the first support baseline? | Reproducibility | Shua | M5 entry | Open |
-| OQ-009 | Which 20 samples form the acceptance set? | Quality validation | Shua | M5 entry | Deferred; Shua will provide later |
-| OQ-010 | Should a model-cache reset control be included in MVP settings? | Recovery and storage management | Shua | Before M4 | Open |
-| OQ-011 | Can Japanese be added with negligible incremental model and testing cost? | Optional MVP scope | Shua | M1 exit | Open; defaults to post-MVP |
-| OQ-012 | Can Korean be added with negligible incremental model and testing cost? | Optional MVP scope | Shua | M1 exit | Open; defaults to post-MVP |
+| ID     | Question or decision                                                                                          | Impact                                       | Owner | Due point | Status                                                                                                                                            |
+| ------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ----- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OQ-001 | Which exact OCR runtime version and Simplified Chinese language data provide the best size/quality tradeoff?  | Accuracy, licensing, and download size       | Shua  | M1 exit   | Provisionally resolved: Tesseract.js 7.0.0 with packaged `chi_sim` best-int data; sample validation remains                                       |
+| OQ-002 | Which exact local Chinese-to-English model and runtime meet quality, license, size, and browser requirements? | Core feasibility                             | Shua  | M1 exit   | Provisionally resolved: Transformers.js 4.3.0 with quantized `Xenova/opus-mt-zh-en`; sample and performance validation remain                     |
+| OQ-003 | What preprocessing and orientation strategy is required for vertical manga text?                              | OCR quality and latency                      | Shua  | M1 exit   | Open                                                                                                                                              |
+| OQ-004 | What are the exact model download and installed-cache sizes?                                                  | First-run UX and storage                     | Shua  | M1 exit   | Open                                                                                                                                              |
+| OQ-005 | How will model assets be hosted or packaged within Manifest V3 and relevant distribution policies?            | Security, compliance, and release packaging  | Shua  | Before M3 | Provisionally resolved: executable JS/WASM and OCR data are packaged; translation weights are downloaded as non-executable data from Hugging Face |
+| OQ-006 | What result-card overflow behavior works best for translations longer than the selected region?               | Usability                                    | Shua  | Before M4 | Open                                                                                                                                              |
+| OQ-007 | Should scrolling reposition the overlay or close the active session?                                          | UX consistency and implementation complexity | Shua  | Before M4 | Open                                                                                                                                              |
+| OQ-008 | What exact current Chrome and Opera GX versions establish the first support baseline?                         | Reproducibility                              | Shua  | M5 entry  | Open                                                                                                                                              |
+| OQ-009 | Which 20 samples form the acceptance set?                                                                     | Quality validation                           | Shua  | M5 entry  | Deferred; Shua will provide later                                                                                                                 |
+| OQ-010 | Should a model-cache reset control be included in MVP settings?                                               | Recovery and storage management              | Shua  | Before M4 | Open                                                                                                                                              |
+| OQ-011 | Can Japanese be added with negligible incremental model and testing cost?                                     | Optional MVP scope                           | Shua  | M1 exit   | Open; defaults to post-MVP                                                                                                                        |
+| OQ-012 | Can Korean be added with negligible incremental model and testing cost?                                       | Optional MVP scope                           | Shua  | M1 exit   | Open; defaults to post-MVP                                                                                                                        |
 
 Open technical questions do not authorize silent scope expansion. Decisions that change privacy, cost, supported languages, core UX, or distribution require PRD review and approval.
 
 ## 24. Requirement traceability
 
-| Goal | Supporting journeys | Functional requirements | Non-functional requirements |
-|---|---|---|---|
-| Understand visual Chinese text | UJ-002, UJ-003 | FR-011 through FR-016, FR-021 | NFR-001, NFR-002, NFR-006 |
-| Reduce workflow friction | UJ-002, UJ-004, UJ-006 | FR-001 through FR-006, FR-017 through FR-026 | NFR-001, NFR-007, NFR-008 |
-| Keep captured content private | UJ-001 through UJ-005 | FR-006, FR-010, FR-014, FR-023, FR-029 | NFR-003, NFR-004, NFR-009, NFR-011 |
-| Remain free to use | UJ-001, UJ-002 | FR-007 through FR-016 | NFR-005, NFR-012, NFR-013 |
-| Operate reliably in selected browsers | UJ-001, UJ-002, UJ-005, UJ-006 | FR-001 through FR-029 | NFR-006, NFR-008, NFR-010, NFR-014 |
+| Goal                                  | Supporting journeys            | Functional requirements                      | Non-functional requirements        |
+| ------------------------------------- | ------------------------------ | -------------------------------------------- | ---------------------------------- |
+| Understand visual Chinese text        | UJ-002, UJ-003                 | FR-011 through FR-016, FR-021                | NFR-001, NFR-002, NFR-006          |
+| Reduce workflow friction              | UJ-002, UJ-004, UJ-006         | FR-001 through FR-006, FR-017 through FR-026 | NFR-001, NFR-007, NFR-008          |
+| Keep captured content private         | UJ-001 through UJ-005          | FR-006, FR-010, FR-014, FR-023, FR-029       | NFR-003, NFR-004, NFR-009, NFR-011 |
+| Remain free to use                    | UJ-001, UJ-002                 | FR-007 through FR-016                        | NFR-005, NFR-012, NFR-013          |
+| Operate reliably in selected browsers | UJ-001, UJ-002, UJ-005, UJ-006 | FR-001 through FR-029                        | NFR-006, NFR-008, NFR-010, NFR-014 |
 
 No MVP requirement is intentionally orphaned from the product goals. Japanese, Korean, and full-viewport functionality are roadmap items rather than MVP requirements.
 
@@ -696,25 +697,27 @@ These references inform feasibility but do not override the requirements and app
 
 ### Decision log
 
-| Date | Decision | Rationale |
-|---|---|---|
-| 2026-09-20 | Build a Chromium extension targeting Opera GX and Chrome | Matches the product owner's browsing environment and portfolio goal |
-| 2026-09-20 | Use local OCR and translation | Preserves privacy and avoids API fees |
-| 2026-09-20 | Limit the MVP to one selected region | Reduces layout and multi-region complexity while validating the core workflow |
-| 2026-09-20 | Use Simplified Chinese as the required source language | Primary current use case; Japanese and Korean remain future options |
-| 2026-09-20 | Include horizontal and vertical text | Required for website and manga usage |
-| 2026-09-20 | Display a solid card over the source region | Simple, legible replacement without image reconstruction |
-| 2026-09-20 | Store no captures or translation history | No user need justifies persistent content storage |
-| 2026-09-20 | Release through public GitHub first | Supports a zero-budget portfolio release without store dependency |
-| 2026-09-20 | Use MIT for Croppa and preserve third-party notices | Enables permissive sharing while respecting dependency licenses |
+| Date       | Decision                                                                         | Rationale                                                                               |
+| ---------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 2026-09-20 | Build a Chromium extension targeting Opera GX and Chrome                         | Matches the product owner's browsing environment and portfolio goal                     |
+| 2026-09-20 | Use local OCR and translation                                                    | Preserves privacy and avoids API fees                                                   |
+| 2026-09-20 | Limit the MVP to one selected region                                             | Reduces layout and multi-region complexity while validating the core workflow           |
+| 2026-09-20 | Use Simplified Chinese as the required source language                           | Primary current use case; Japanese and Korean remain future options                     |
+| 2026-09-20 | Include horizontal and vertical text                                             | Required for website and manga usage                                                    |
+| 2026-09-20 | Display a solid card over the source region                                      | Simple, legible replacement without image reconstruction                                |
+| 2026-09-20 | Store no captures or translation history                                         | No user need justifies persistent content storage                                       |
+| 2026-09-20 | Release through public GitHub first                                              | Supports a zero-budget portfolio release without store dependency                       |
+| 2026-09-20 | Use MIT for Croppa and preserve third-party notices                              | Enables permissive sharing while respecting dependency licenses                         |
+| 2026-09-20 | Package all executable worker and WebAssembly assets                             | Required by Manifest V3; only non-executable translation model data is fetched remotely |
+| 2026-09-20 | Provisionally use Tesseract.js 7 and quantized OPUS-MT through Transformers.js 4 | Provides a zero-cost, local-first feasibility path pending representative validation    |
 
 ## Approval checklist
 
 Before implementation begins, Shua must confirm:
 
-- [ ] The MVP requirements and non-goals match the intended first release.
-- [ ] Simplified Chinese is the only required MVP source language; Japanese and Korean default to post-MVP.
-- [ ] Local-only content processing and on-demand model downloads are acceptable.
-- [ ] The 16-of-20 acceptance target is acceptable.
-- [ ] The listed open technical questions may be resolved during the feasibility milestone without changing approved product behavior.
-- [ ] This PRD is approved as the implementation source of truth.
+- [x] The MVP requirements and non-goals match the intended first release.
+- [x] Simplified Chinese is the only required MVP source language; Japanese and Korean default to post-MVP.
+- [x] Local-only content processing and on-demand model downloads are acceptable.
+- [x] The 16-of-20 acceptance target is acceptable.
+- [x] The listed open technical questions may be resolved during the feasibility milestone without changing approved product behavior.
+- [x] This PRD is approved as the implementation source of truth.

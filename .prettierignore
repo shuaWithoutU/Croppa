@@ -1,0 +1,6 @@
+dist/
+coverage/
+node_modules/
+public/tesseract/
+public/ort/
+package-lock.json
