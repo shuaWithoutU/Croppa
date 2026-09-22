@@ -63,6 +63,31 @@ function button(label: string) {
 const result = { ok: true, sourceText: '测试', translatedText: 'Test', durationMs: 100 };
 
 describe('capture and result interactions', () => {
+  it('retries with the selected layout, retains it within the session, and resets for a new snip', async () => {
+    await selectRegion();
+    resolveCapture(result);
+    await vi.waitFor(() => expect(button('Edit source')).toBeDefined());
+    button('Edit source').click();
+    const layout = root.querySelector<HTMLSelectElement>('#croppa-layout')!;
+    expect(layout.value).toBe('auto');
+    layout.value = 'vertical';
+    button('Read image again').click();
+    await vi.waitFor(() =>
+      expect(sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'CAPTURE_REGION', layout: 'vertical' }),
+      ),
+    );
+    expect(document.getElementById('croppa-extension-root')!.style.visibility).toBe('hidden');
+    resolveCapture(result);
+    await vi.waitFor(() => expect(button('Edit source')).toBeDefined());
+    button('Edit source').click();
+    expect(root.querySelector<HTMLSelectElement>('#croppa-layout')!.value).toBe('vertical');
+    sendMessage.mockClear();
+    await selectRegion();
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'CAPTURE_REGION', layout: 'auto' }),
+    );
+  });
   it('clears prior source and translation after a failed correction request', async () => {
     await selectRegion();
     resolveCapture(result);

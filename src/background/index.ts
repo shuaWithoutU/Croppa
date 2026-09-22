@@ -206,6 +206,7 @@ async function handleMessage(
         captureDataUrl,
         rect: message.rect,
         viewport: message.viewport,
+        layout: message.layout,
       });
     } catch (error) {
       return errorResult(

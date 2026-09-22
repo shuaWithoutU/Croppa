@@ -1,9 +1,13 @@
 import { PSM } from 'tesseract.js';
 
 import { isLikelyVertical, type SelectionRect } from '../shared/geometry';
+import type { OcrLayout } from '../shared/messages';
 
-/** Chooses a focused segmentation mode, then a broader fallback if OCR finds no text. */
-export function getOcrModes(rect: SelectionRect): PSM[] {
+/** Honors explicit layout choices; only Auto may retry using a different segmentation mode. */
+export function getOcrModes(rect: SelectionRect, layout: OcrLayout = 'auto'): PSM[] {
+  if (layout === 'horizontal-line') return [PSM.SINGLE_LINE];
+  if (layout === 'horizontal-block') return [PSM.SINGLE_BLOCK];
+  if (layout === 'vertical') return [PSM.SINGLE_BLOCK_VERT_TEXT];
   if (isLikelyVertical(rect)) {
     return [PSM.SINGLE_BLOCK_VERT_TEXT, PSM.SINGLE_BLOCK];
   }

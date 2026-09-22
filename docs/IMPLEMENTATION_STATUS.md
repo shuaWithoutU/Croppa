@@ -22,8 +22,26 @@ Local validation on 2026-09-22: `npm run check` passed formatting, lint, TypeScr
 returned HTTP 200 with the expected page. `git diff --check` passed. Vite still emits
 its non-fatal warning about the bundled processor exceeding 500 kB.
 
-The rebuilt unpacked extension is in `dist/`. Changes are uncommitted and have not
-been pushed; the existing local HEAD remains `512eab4`.
+The 2026-09-22 changes were committed locally on 2026-09-23 as `0d2f25a`
+(`Fix capture reliability and improve model setup and OCR recovery`). No push was performed.
+
+## Next feature: per-session OCR layout override (2026-09-23)
+
+Edit source now offers Auto, Horizontal line, Horizontal block, and Vertical layouts
+with a Read image again action. Explicit choices use one segmentation mode rather
+than falling back to a different layout; Auto preserves heuristic fallback. Choices
+remain only in the current session and reset on a new snip. Retrying recaptures the
+region; translating an edited source remains a separate, capture-free action.
+
+This is a recovery control for the existing horizontal/vertical Chinese requirements,
+not a claim of improved measured accuracy. Segmentation choices follow the
+[Tesseract layout guidance](https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html).
+Browser acceptance steps are in the manual checklist.
+
+Validation on 2026-09-23: `npm run check` passed all checks, including 37 tests and
+the production build. Layout selection, message validation, processor routing, and
+session reset have automated coverage; real OCR quality and browser interaction
+still require the documented manual tests.
 
 Automated tests use mocked Chromium APIs and mocked model output. A build passing does not establish live Opera GX/Chrome compatibility, OCR quality, translation quality, real model cancellation, screen-reader behavior, or runtime network privacy. Complete [MANUAL_TESTS.md](MANUAL_TESTS.md) before calling this MVP release ready.
 
@@ -44,4 +62,4 @@ The representative 20-sample set is still awaiting Shua. Japanese, Korean, full-
 - Verify real download cancellation, cached restart, storage-pressure failure, keyboard/screen-reader behavior, network traffic, and storage contents.
 - Finish the complete transitive dependency license inventory and package required notices before publishing a release artifact.
 - Record measured download/cache size, latency, tested browser versions, and quality failures.
-- Obtain approval for a commit message before committing. No remote push is authorized for this iteration.
+- Source publication does not mark the MVP as release ready; the manual release gates above remain open.

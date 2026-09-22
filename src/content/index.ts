@@ -6,6 +6,8 @@ import {
 } from '../shared/geometry';
 import {
   isContentMessage,
+  isOcrLayout,
+  type OcrLayout,
   type OperationResult,
   type ProcessingStage,
   type ProcessResult,
@@ -16,6 +18,7 @@ const HOST_ID = 'croppa-extension-root';
 interface ActiveSession {
   id: string;
   rect: SelectionRect;
+  layout?: OcrLayout;
   sourceText?: string;
   translatedText?: string;
 }
@@ -136,6 +139,7 @@ async function requestCapture(activeSession: ActiveSession): Promise<void> {
       type: 'CAPTURE_REGION',
       sessionId: requestId,
       rect: activeSession.rect,
+      layout: activeSession.layout ?? 'auto',
       viewport: {
         width: window.innerWidth,
         height: window.innerHeight,
@@ -249,6 +253,32 @@ function renderSourceEditor(): void {
     textarea.rows = 4;
     textarea.maxLength = 2000;
 
+    const layoutLabel = document.createElement('label');
+    layoutLabel.className = 'croppa-label';
+    layoutLabel.htmlFor = 'croppa-layout';
+    layoutLabel.textContent = 'Text layout';
+    const layout = document.createElement('select');
+    layout.id = 'croppa-layout';
+    layout.className = 'croppa-editor';
+    for (const [value, title] of [
+      ['auto', 'Auto'],
+      ['horizontal-line', 'Horizontal line'],
+      ['horizontal-block', 'Horizontal block (multiple lines)'],
+      ['vertical', 'Vertical'],
+    ]) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = title;
+      layout.append(option);
+    }
+    layout.value = session?.layout ?? 'auto';
+    const hint = document.createElement('p');
+    hint.id = 'croppa-layout-help';
+    hint.className = 'croppa-meta';
+    hint.textContent =
+      'Wrong reading order? Choose the layout, then read the image again. This replaces any edits with fresh OCR.';
+    layout.setAttribute('aria-describedby', hint.id);
+
     const actions = document.createElement('div');
     actions.className = 'croppa-actions';
     const translateButton = createButton(
@@ -262,6 +292,11 @@ function renderSourceEditor(): void {
     });
     actions.append(
       translateButton,
+      createButton('Read image again', () => {
+        if (!session || !isOcrLayout(layout.value)) return;
+        session.layout = layout.value;
+        void requestCapture(session);
+      }),
       createButton('Cancel', () => {
         if (session?.sourceText && session.translatedText) {
           renderResult({
@@ -273,7 +308,7 @@ function renderSourceEditor(): void {
         } else renderError('Enter Chinese text manually or retry the selection.');
       }),
     );
-    card.append(label, textarea, actions);
+    card.append(label, textarea, layoutLabel, layout, hint, actions);
     queueMicrotask(() => textarea.focus());
   });
 }

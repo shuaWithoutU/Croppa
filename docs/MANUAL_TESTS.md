@@ -22,6 +22,15 @@ Keep screenshots and recognized/translated private material out of Git. Record o
 | S04 | Snip the blank canvas. Choose Edit source and enter `你好`.                          | An actionable no-text state appears; manual entry translates to “Hello” without recapturing. Empty input cannot be submitted. |
 | S05 | Start a capture and press Escape during processing, then start another.              | Old work stops; no late result replaces the new session. If briefly busy during teardown, retry after it stops.               |
 
+## Layout override regression (2026-09-23)
+
+1. Snip a fixture and open Edit source. Text layout should start on Auto.
+2. Choose Horizontal line for a one-line fixture, Horizontal block for two lines, or Vertical for the vertical fixture. Select Read image again.
+3. Confirm OCR runs again over the same region, the overlay is not captured, and no duplicate card appears. Compare recognized Chinese against the fixture; improvement is not guaranteed.
+4. Reopen Edit source: the applied layout should remain selected. Retry should reuse it. A new snip should start on Auto.
+5. Type a correction and select Translate: it should translate that correction without a screenshot. Changing layout without pressing Read image again must not discard your edit or change recognition automatically.
+6. On a no-text error, open Edit source and test the same layout controls. Verify labels, keyboard selection, and focus in both themes.
+
 ## Setup and recovery
 
 Use a separate test browser profile for destructive storage tests so your ordinary model cache stays intact.

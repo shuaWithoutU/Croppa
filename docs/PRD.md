@@ -697,6 +697,12 @@ These references inform feasibility but do not override the requirements and app
 
 ### Decision log
 
+2026-09-23 implementation note for FR-012 / OQ-003: add a per-session layout override
+inside Edit source (Auto, Horizontal line, Horizontal block, Vertical). Read image
+again applies the choice to a fresh capture of the same region; Translate continues
+to use the edited text without recapture. This advances the existing orientation and
+OCR-recovery scope. Representative horizontal/vertical accuracy validation remains open.
+
 | Date       | Decision                                                                         | Rationale                                                                               |
 | ---------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | 2026-09-20 | Build a Chromium extension targeting Opera GX and Chrome                         | Matches the product owner's browsing environment and portfolio goal                     |

@@ -62,6 +62,12 @@ function dispatch(message: unknown, sender = page): Promise<any> {
 }
 
 describe('background coordination', () => {
+  it('forwards the selected OCR layout to the processor', async () => {
+    await dispatch({ ...request, layout: 'vertical' });
+    expect(sendMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'PROCESS_CAPTURE', layout: 'vertical' }),
+    );
+  });
   it('refuses to capture a different active tab', async () => {
     query.mockResolvedValue([{ id: 2 }]);
     expect(await dispatch(request)).toMatchObject({ ok: false, code: 'CAPTURE_FAILED' });

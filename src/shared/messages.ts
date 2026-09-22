@@ -1,5 +1,15 @@
 import type { SelectionRect, ViewportSize } from './geometry';
 
+export type OcrLayout = 'auto' | 'horizontal-line' | 'horizontal-block' | 'vertical';
+
+/** Validates layout choices at both extension message boundaries. */
+export function isOcrLayout(value: unknown): value is OcrLayout {
+  return (
+    typeof value === 'string' &&
+    ['auto', 'horizontal-line', 'horizontal-block', 'vertical'].includes(value)
+  );
+}
+
 export type ProcessingStage =
   'capturing' | 'preparing-ocr' | 'downloading' | 'recognizing' | 'translating';
 
@@ -28,6 +38,7 @@ export interface CaptureRegionRequest {
   sessionId: string;
   rect: SelectionRect;
   viewport: ViewportSize;
+  layout?: OcrLayout;
 }
 
 export interface TranslateTextRequest {
@@ -55,6 +66,7 @@ export interface ProcessCaptureRequest {
   captureDataUrl: string;
   rect: SelectionRect;
   viewport: ViewportSize;
+  layout?: OcrLayout;
 }
 
 export interface ProcessorTranslateRequest {
@@ -137,7 +149,8 @@ export function isBackgroundRequest(value: unknown): value is BackgroundRequest 
         isNonEmptyString(value.sessionId) &&
         isSelectionRect(value.rect) &&
         isViewportSize(value.viewport) &&
-        isWithinViewport(value.rect, value.viewport)
+        isWithinViewport(value.rect, value.viewport) &&
+        (value.layout === undefined || isOcrLayout(value.layout))
       );
     case 'TRANSLATE_TEXT':
       return isNonEmptyString(value.sessionId) && isSourceText(value.sourceText);
@@ -169,7 +182,8 @@ export function isProcessorRequest(value: unknown): value is ProcessorRequest {
         isDataImage(value.captureDataUrl) &&
         isSelectionRect(value.rect) &&
         isViewportSize(value.viewport) &&
-        isWithinViewport(value.rect, value.viewport)
+        isWithinViewport(value.rect, value.viewport) &&
+        (value.layout === undefined || isOcrLayout(value.layout))
       );
     case 'PROCESS_TRANSLATION':
       return isNonEmptyString(value.sessionId) && isSourceText(value.sourceText);

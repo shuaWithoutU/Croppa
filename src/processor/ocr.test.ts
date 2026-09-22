@@ -4,6 +4,14 @@ import { describe, expect, it } from 'vitest';
 import { getOcrModes, normalizeOcrPolarity } from './ocr';
 
 describe('OCR segmentation', () => {
+  it('honors explicit layouts even when the selection shape suggests another orientation', () => {
+    const tall = { x: 0, y: 0, width: 40, height: 200 };
+    const wide = { x: 0, y: 0, width: 300, height: 60 };
+    expect(getOcrModes(tall, 'horizontal-line')).toEqual([PSM.SINGLE_LINE]);
+    expect(getOcrModes(tall, 'horizontal-block')).toEqual([PSM.SINGLE_BLOCK]);
+    expect(getOcrModes(wide, 'vertical')).toEqual([PSM.SINGLE_BLOCK_VERT_TEXT]);
+    expect(getOcrModes(wide, 'auto')).toEqual(getOcrModes(wide));
+  });
   it('tries single-line recognition first for a short horizontal selection', () => {
     expect(getOcrModes({ x: 0, y: 0, width: 300, height: 90 })).toEqual([
       PSM.SINGLE_LINE,

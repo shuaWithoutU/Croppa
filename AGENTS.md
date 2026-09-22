@@ -54,6 +54,7 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 - Keep all controls after region selection keyboard operable, visibly focused, properly labelled, and readable at WCAG 2.2 AA contrast.
 - Errors must be concise and actionable. Never expose stack traces or captured content to users.
 - Failed OCR must allow manual source entry. Report clipboard failure honestly, and keep internal card scrolling separate from page-scroll dismissal.
+- Keep OCR layout overrides inside Edit source. Apply them only through Read image again, retain the applied choice for Retry, and reset to Auto on a new snip. Translate must remain capture-free.
 - Model-download percentages describe the current asset. Normalize Transformers' 0–100 progress separately from Tesseract's 0–1 progress.
 - Isolate injected UI from webpage styles and scripts with Shadow DOM, while keeping the popup and options pages visually consistent with the in-page overlay.
 

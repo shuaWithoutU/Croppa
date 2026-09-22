@@ -62,6 +62,12 @@ The unpacked extension is generated in `dist/`.
 4. Drag around one text region or speech bubble.
 5. Use **Copy**, **Edit source**, **Retry**, or **Close** on the translated overlay.
 
+If OCR gets the reading order wrong, open **Edit source**, choose **Text layout**
+(Auto, Horizontal line, Horizontal block, or Vertical), then select **Read image again**.
+This recaptures the same region and replaces any source edits. The layout applies only
+to that session; a new snip starts on Auto. Translate still submits your edited Chinese
+without taking another screenshot.
+
 Browser-internal pages, extension stores, and other restricted pages cannot be captured. Shortcuts can be changed through the browser's extension-shortcut settings.
 
 ## Development commands
@@ -100,7 +106,7 @@ Captured pixels, recognized Chinese, user corrections, and English translations 
 - Clear printed text is the initial accuracy target
 - Stylized fonts, handwriting, low resolution, and complex backgrounds may reduce OCR accuracy
 - OCR adds a small border and inverts clearly dark backgrounds; unusually mixed backgrounds may still need source correction
-- Vertical text currently uses an aspect-ratio heuristic and still needs representative manga validation
+- Auto layout uses an aspect-ratio heuristic; explicit layout overrides are available, but vertical manga accuracy still needs representative validation
 - First-time model preparation is sizeable and may take several minutes
 - Performance varies by hardware; the 2-3 second target applies after models are ready and is not yet validated
 - Scrolling or resizing closes the active overlay to prevent position drift

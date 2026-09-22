@@ -14,6 +14,7 @@ import {
   type OperationResult,
   type ProcessingStage,
   type ProcessorRequest,
+  type OcrLayout,
 } from '../shared/messages';
 const TRANSLATION_MODEL = 'Xenova/opus-mt-zh-en';
 
@@ -109,7 +110,7 @@ async function handleProcessorRequest(message: ProcessorRequest): Promise<Operat
     }
     let sourceText: string;
     try {
-      sourceText = await recognize(image, message.sessionId, message.rect);
+      sourceText = await recognize(image, message.sessionId, message.rect, message.layout);
     } finally {
       image.width = 0;
       image.height = 0;
@@ -192,12 +193,13 @@ async function recognize(
   image: HTMLCanvasElement,
   sessionId: string,
   rect: SelectionRect,
+  layout: OcrLayout = 'auto',
 ): Promise<string> {
   sendProgress(sessionId, 'recognizing', 0);
   const worker = await getOcrWorker(sessionId);
   let best = { text: '', confidence: -1 };
   try {
-    for (const mode of getOcrModes(rect)) {
+    for (const mode of getOcrModes(rect, layout)) {
       await worker.setParameters({
         tessedit_pageseg_mode: mode,
         preserve_interword_spaces: '1',
