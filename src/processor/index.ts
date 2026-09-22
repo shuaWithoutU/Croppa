@@ -1,15 +1,13 @@
 import { env, pipeline } from '@huggingface/transformers';
-import { createWorker, OEM, PSM, type Worker } from 'tesseract.js';
+import { createWorker, OEM, type Worker } from 'tesseract.js';
 
 import ortMjsUrl from '../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.mjs?url';
 import ortWasmUrl from '../../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.asyncify.wasm?url';
 
-import {
-  isLikelyVertical,
-  toBitmapCrop,
-  type SelectionRect,
-  type ViewportSize,
-} from '../shared/geometry';
+import { captureDataUrlToBlob } from './capture';
+import { downloadProgress } from '../shared/progress';
+import { getOcrModes, normalizeOcrPolarity } from './ocr';
+import { toBitmapCrop, type SelectionRect, type ViewportSize } from '../shared/geometry';
 import {
   isProcessorRequest,
   type ErrorResult,
@@ -65,11 +63,25 @@ async function handleProcessorRequest(message: ProcessorRequest): Promise<Operat
 
   try {
     if (message.type === 'PROCESS_PREPARE') {
-      await prepareModels(message.sessionId);
+      try {
+        await prepareModels(message.sessionId);
+      } catch {
+        return errorResult(
+          'MODEL_FAILED',
+          'Model setup failed. Check your connection and free disk space, then retry in Croppa settings.',
+        );
+      }
       return { ok: true };
     }
 
-    await prepareModels(message.sessionId);
+    try {
+      await prepareModels(message.sessionId);
+    } catch {
+      return errorResult(
+        'MODEL_FAILED',
+        'Local models could not load. Open Croppa settings and prepare them again.',
+      );
+    }
 
     if (message.type === 'PROCESS_TRANSLATION') {
       const sourceText = cleanRecognizedText(message.sourceText);
@@ -85,8 +97,23 @@ async function handleProcessorRequest(message: ProcessorRequest): Promise<Operat
       };
     }
 
-    const image = await cropCapture(message.captureDataUrl, message.rect, message.viewport);
-    const sourceText = await recognize(image, message.sessionId, isLikelyVertical(message.rect));
+    let image: HTMLCanvasElement;
+    try {
+      image = await cropCapture(message.captureDataUrl, message.rect, message.viewport);
+      message.captureDataUrl = '';
+    } catch {
+      return errorResult(
+        'CAPTURE_FAILED',
+        'Croppa could not read the captured image. Try selecting the region again.',
+      );
+    }
+    let sourceText: string;
+    try {
+      sourceText = await recognize(image, message.sessionId, message.rect);
+    } finally {
+      image.width = 0;
+      image.height = 0;
+    }
     if (!sourceText) {
       return errorResult(
         'NO_TEXT',
@@ -104,6 +131,10 @@ async function handleProcessorRequest(message: ProcessorRequest): Promise<Operat
   } catch (error) {
     const safeMessage = getSafeErrorMessage(error);
     return errorResult('PROCESSING_FAILED', safeMessage);
+  } finally {
+    activeProgressSessionId = '';
+    if (message.type === 'PROCESS_CAPTURE') message.captureDataUrl = '';
+    if (message.type === 'PROCESS_TRANSLATION') message.sourceText = '';
   }
 }
 
@@ -139,13 +170,13 @@ async function getOcrWorker(sessionId: string): Promise<Worker> {
 
 async function getTranslator(sessionId: string): Promise<any> {
   if (!translatorPromise) {
-    sendProgress(sessionId, 'translating', 0);
+    sendProgress(sessionId, 'downloading', 0);
     translatorPromise = pipeline('translation', TRANSLATION_MODEL, {
       dtype: 'q8',
       device: 'wasm',
       progress_callback: (progress: unknown) => {
-        const normalized = extractProgress(progress);
-        sendProgress(activeProgressSessionId, 'translating', normalized);
+        const normalized = downloadProgress(progress);
+        sendProgress(activeProgressSessionId, 'downloading', normalized);
       },
     }).catch((error) => {
       translatorPromise = undefined;
@@ -156,20 +187,35 @@ async function getTranslator(sessionId: string): Promise<any> {
   return translatorPromise;
 }
 
+/** Tries a second layout for uncertain OCR and keeps the most confident Chinese candidate. */
 async function recognize(
   image: HTMLCanvasElement,
   sessionId: string,
-  vertical: boolean,
+  rect: SelectionRect,
 ): Promise<string> {
   sendProgress(sessionId, 'recognizing', 0);
   const worker = await getOcrWorker(sessionId);
-  await worker.setParameters({
-    tessedit_pageseg_mode: vertical ? PSM.SINGLE_BLOCK_VERT_TEXT : PSM.AUTO,
-    preserve_interword_spaces: '1',
-    user_defined_dpi: '300',
-  });
-  const result = await worker.recognize(image);
-  return cleanRecognizedText(result.data.text);
+  let best = { text: '', confidence: -1 };
+  try {
+    for (const mode of getOcrModes(rect)) {
+      await worker.setParameters({
+        tessedit_pageseg_mode: mode,
+        preserve_interword_spaces: '1',
+        user_defined_dpi: '300',
+      });
+      const result = await worker.recognize(image);
+      const text = cleanRecognizedText(result.data.text);
+      if (!/[\u3400-\u9fff]/u.test(text)) continue;
+      const confidence = Number.isFinite(result.data.confidence) ? result.data.confidence : 0;
+      if (confidence > best.confidence) best = { text, confidence };
+      if (confidence >= 85) break;
+    }
+    return best.text;
+  } finally {
+    // Tesseract retains its last image internally; release the worker after each capture.
+    ocrWorkerPromise = undefined;
+    await worker.terminate();
+  }
 }
 
 async function translate(sourceText: string, sessionId: string): Promise<string> {
@@ -187,12 +233,13 @@ async function translate(sourceText: string, sessionId: string): Promise<string>
   return translatedText;
 }
 
+/** Crops the screenshot into an OCR-only canvas; pixels never leave memory. */
 async function cropCapture(
   captureDataUrl: string,
   rect: SelectionRect,
   viewport: ViewportSize,
 ): Promise<HTMLCanvasElement> {
-  const blob = await (await fetch(captureDataUrl)).blob();
+  const blob = captureDataUrlToBlob(captureDataUrl);
   const bitmap = await createImageBitmap(blob);
 
   try {
@@ -201,14 +248,19 @@ async function cropCapture(
       height: bitmap.height,
     });
     const upscale = Math.max(crop.width, crop.height) < 1200 ? 2 : 1;
+    const padding = 12;
+    const imageWidth = crop.width * upscale;
+    const imageHeight = crop.height * upscale;
     const canvas = document.createElement('canvas');
-    canvas.width = crop.width * upscale;
-    canvas.height = crop.height * upscale;
+    canvas.width = imageWidth + padding * 2;
+    canvas.height = imageHeight + padding * 2;
     const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) {
       throw new Error('Croppa could not create an image-processing canvas.');
     }
 
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
     context.filter = 'grayscale(1) contrast(1.2)';
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = 'high';
@@ -218,11 +270,15 @@ async function cropCapture(
       crop.y,
       crop.width,
       crop.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
+      padding,
+      padding,
+      imageWidth,
+      imageHeight,
     );
+    const pixels = context.getImageData(padding, padding, imageWidth, imageHeight);
+    if (normalizeOcrPolarity(pixels)) {
+      context.putImageData(pixels, padding, padding);
+    }
     return canvas;
   } finally {
     bitmap.close();
@@ -230,13 +286,15 @@ async function cropCapture(
 }
 
 function sendProgress(sessionId: string, stage: ProcessingStage, progress?: number): void {
-  void chrome.runtime.sendMessage({
-    target: 'background',
-    type: 'PROCESSOR_PROGRESS',
-    sessionId,
-    stage,
-    progress,
-  });
+  void chrome.runtime
+    .sendMessage({
+      target: 'background',
+      type: 'PROCESSOR_PROGRESS',
+      sessionId,
+      stage,
+      progress,
+    })
+    .catch(() => undefined);
 }
 
 function cleanRecognizedText(value: string): string {
@@ -244,14 +302,6 @@ function cleanRecognizedText(value: string): string {
     .replace(/\s*\n\s*/g, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
-}
-
-function extractProgress(value: unknown): number | undefined {
-  if (typeof value !== 'object' || value === null || !('progress' in value)) {
-    return undefined;
-  }
-  const progress = (value as { progress?: unknown }).progress;
-  return typeof progress === 'number' ? Math.min(1, Math.max(0, progress)) : undefined;
 }
 
 function extractTranslation(value: unknown): string {
@@ -267,7 +317,7 @@ function getSafeErrorMessage(error: unknown): string {
     if (/network|fetch|download/i.test(error.message)) {
       return 'Croppa could not download or load its local models. Check your connection and retry.';
     }
-    return error.message;
+    return 'Local processing failed. Retry with a clearer region or enter the Chinese text using Edit source.';
   }
   return 'Croppa could not process this selection.';
 }

@@ -56,7 +56,7 @@ The unpacked extension is generated in `dist/`.
 
 ## Use Croppa
 
-1. Open Croppa's options page and select **Prepare local models**, or allow the first capture to prepare them automatically.
+1. Open Croppa's options page and select **Prepare local models**. The toolbar opens settings first if models have not been prepared. Setup shows current-asset progress and supports cancellation and retry.
 2. Open a normal `http` or `https` page containing Simplified Chinese text.
 3. Click the Croppa toolbar icon or use `Ctrl+Shift+Y` if that shortcut is available.
 4. Drag around one text region or speech bubble.
@@ -72,6 +72,7 @@ npm run format       # format tracked source and documentation
 npm run lint         # run ESLint
 npm run typecheck    # run TypeScript checks
 npm test             # run unit tests
+npm run test:page     # serve owned OCR fixtures at http://127.0.0.1:4174
 npm run build        # prepare local runtime assets and build dist/
 npm run check        # run every quality gate
 ```
@@ -95,12 +96,27 @@ Captured pixels, recognized Chinese, user corrections, and English translations 
 
 - Simplified Chinese to English only
 - One selected text region at a time
+- Only one inference operation runs across the extension at a time; another tab receives a busy message
 - Clear printed text is the initial accuracy target
 - Stylized fonts, handwriting, low resolution, and complex backgrounds may reduce OCR accuracy
+- OCR adds a small border and inverts clearly dark backgrounds; unusually mixed backgrounds may still need source correction
 - Vertical text currently uses an aspect-ratio heuristic and still needs representative manga validation
 - First-time model preparation is sizeable and may take several minutes
 - Performance varies by hardware; the 2-3 second target applies after models are ready and is not yet validated
 - Scrolling or resizing closes the active overlay to prevent position drift
+- OCR workers restart between captures to release their last image, which may add latency
+
+## Test the current build
+
+After building, reload Croppa in the browser's extensions page and refresh the target webpage.
+Follow [the manual checklist](docs/MANUAL_TESTS.md), starting with its first five tests.
+Run `npm run test:page` for owned Chinese samples on a local HTTP page; stop it with Ctrl+C.
+The [implementation handoff](docs/IMPLEMENTATION_STATUS.md) distinguishes implemented behavior from pending browser and accuracy validation.
+
+Setup can be cancelled; completed model assets remain cached. Closing an active capture stops
+its local processor. Setup times out after ten minutes and capture/translation after two minutes.
+For cache recovery and privacy inspection, see the manual checklist. No captures or translations
+are stored as test fixtures.
 
 ## Project structure
 

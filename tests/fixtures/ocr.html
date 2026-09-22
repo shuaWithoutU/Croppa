@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Croppa — owned OCR test fixtures</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font:
+          16px/1.6 system-ui,
+          sans-serif;
+      }
+      body {
+        max-width: 960px;
+        margin: 32px auto;
+        padding: 16px;
+      }
+      article {
+        margin: 32px 0;
+        padding: 16px;
+        border: 1px solid #888;
+      }
+      canvas {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Croppa OCR test page</h1>
+    <p>
+      These synthetic, project-owned samples are drawn as pixels. Snip only the canvas text with a
+      small margin. Use Edit source to compare recognized Chinese against the expected text below.
+      Labels must stay outside the selection.
+    </p>
+    <button>Focus return test: click here before capture</button>
+    <main id="samples"></main>
+    <script>
+      const samples = [
+        { name: 'Light background', text: '我叫小明。', meaning: 'My name is Xiaoming.' },
+        {
+          name: 'Dark background',
+          text: '我叫小明。',
+          meaning: 'My name is Xiaoming.',
+          dark: true,
+        },
+        { name: 'Single word', text: '你好', meaning: 'Hello.' },
+        { name: 'Punctuation', text: '你今天好吗？', meaning: 'How are you today?' },
+        {
+          name: 'Two lines',
+          text: '今天天气很好。\n我们一起去公园吧。',
+          meaning: 'The weather is nice today. Let’s go to the park together.',
+        },
+        {
+          name: 'Vertical column',
+          text: '欢迎来到这里。',
+          meaning: 'Welcome here.',
+          vertical: true,
+        },
+        {
+          name: 'Smaller print',
+          text: '我喜欢学习中文。',
+          meaning: 'I like learning Chinese.',
+          size: 24,
+        },
+        {
+          name: 'Blank region',
+          text: '',
+          meaning: 'Expected: no readable Chinese, with Retry / Edit source / Close.',
+        },
+      ];
+      for (const sample of samples) {
+        const article = document.createElement('article');
+        const title = document.createElement('h2');
+        title.textContent = sample.name;
+        const canvas = document.createElement('canvas');
+        canvas.width = sample.vertical ? 140 : 680;
+        canvas.height = sample.vertical ? 510 : sample.text.includes('\n') ? 190 : 130;
+        const context = canvas.getContext('2d');
+        context.fillStyle = sample.dark ? '#303133' : '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = sample.dark ? '#eeeeee' : '#111111';
+        context.font = `${sample.size || 48}px "Microsoft YaHei", "Noto Sans CJK SC", sans-serif`;
+        context.textBaseline = 'top';
+        if (sample.vertical) {
+          Array.from(sample.text).forEach((character, index) =>
+            context.fillText(character, 40, 24 + index * 62),
+          );
+        } else {
+          sample.text
+            .split('\n')
+            .forEach((line, index) => context.fillText(line, 24, 30 + index * 70));
+        }
+        const expected = document.createElement('p');
+        expected.textContent = `Expected source: ${sample.text || '(none)'} — Meaning: ${sample.meaning}`;
+        article.append(title, canvas, expected);
+        document.getElementById('samples').append(article);
+      }
+    </script>
+  </body>
+</html>

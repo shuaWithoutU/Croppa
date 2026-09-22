@@ -1,6 +1,13 @@
 import type { SelectionRect, ViewportSize } from './geometry';
 
-export type ProcessingStage = 'capturing' | 'preparing-ocr' | 'recognizing' | 'translating';
+export type ProcessingStage =
+  'capturing' | 'preparing-ocr' | 'downloading' | 'recognizing' | 'translating';
+
+export interface CancelRequest {
+  target: 'background';
+  type: 'CANCEL_SESSION';
+  sessionId: string;
+}
 
 export interface StartSelectionMessage {
   target: 'content';
@@ -86,6 +93,7 @@ export interface StatusResult {
   ok: true;
   modelsReady: boolean;
   lastError?: string;
+  preparationSessionId?: string;
 }
 
 export interface ErrorResult {
@@ -93,6 +101,8 @@ export interface ErrorResult {
   error: string;
   code:
     | 'CAPTURE_FAILED'
+    | 'CANCELLED'
+    | 'BUSY'
     | 'INVALID_REQUEST'
     | 'MODEL_FAILED'
     | 'NO_TEXT'
@@ -104,6 +114,7 @@ export interface ErrorResult {
 export type OperationResult = ProcessResult | PrepareResult | ErrorResult;
 
 export type BackgroundRequest =
+  | CancelRequest
   | CaptureRegionRequest
   | TranslateTextRequest
   | PrepareModelsRequest
@@ -125,11 +136,13 @@ export function isBackgroundRequest(value: unknown): value is BackgroundRequest 
       return (
         isNonEmptyString(value.sessionId) &&
         isSelectionRect(value.rect) &&
-        isViewportSize(value.viewport)
+        isViewportSize(value.viewport) &&
+        isWithinViewport(value.rect, value.viewport)
       );
     case 'TRANSLATE_TEXT':
-      return isNonEmptyString(value.sessionId) && typeof value.sourceText === 'string';
+      return isNonEmptyString(value.sessionId) && isSourceText(value.sourceText);
     case 'PREPARE_MODELS':
+    case 'CANCEL_SESSION':
       return isNonEmptyString(value.sessionId);
     case 'GET_STATUS':
       return true;
@@ -137,7 +150,7 @@ export function isBackgroundRequest(value: unknown): value is BackgroundRequest 
       return (
         isNonEmptyString(value.sessionId) &&
         isProcessingStage(value.stage) &&
-        (value.progress === undefined || typeof value.progress === 'number')
+        isProgress(value.progress)
       );
     default:
       return false;
@@ -155,10 +168,11 @@ export function isProcessorRequest(value: unknown): value is ProcessorRequest {
         isNonEmptyString(value.sessionId) &&
         isDataImage(value.captureDataUrl) &&
         isSelectionRect(value.rect) &&
-        isViewportSize(value.viewport)
+        isViewportSize(value.viewport) &&
+        isWithinViewport(value.rect, value.viewport)
       );
     case 'PROCESS_TRANSLATION':
-      return isNonEmptyString(value.sessionId) && typeof value.sourceText === 'string';
+      return isNonEmptyString(value.sessionId) && isSourceText(value.sourceText);
     case 'PROCESS_PREPARE':
       return isNonEmptyString(value.sessionId);
     default:
@@ -179,7 +193,7 @@ export function isContentMessage(value: unknown): value is ContentMessage {
     value.type === 'PROCESS_PROGRESS' &&
     isNonEmptyString(value.sessionId) &&
     isProcessingStage(value.stage) &&
-    (value.progress === undefined || typeof value.progress === 'number')
+    isProgress(value.progress)
   );
 }
 
@@ -218,10 +232,31 @@ function isViewportSize(value: unknown): value is ViewportSize {
 function isProcessingStage(value: unknown): value is ProcessingStage {
   return (
     typeof value === 'string' &&
-    ['capturing', 'preparing-ocr', 'recognizing', 'translating'].includes(value)
+    ['capturing', 'preparing-ocr', 'downloading', 'recognizing', 'translating'].includes(value)
   );
 }
 
 function isDataImage(value: unknown): value is string {
-  return typeof value === 'string' && value.startsWith('data:image/');
+  return typeof value === 'string' && value.startsWith('data:image/png;base64,');
+}
+
+function isProgress(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1)
+  );
+}
+
+/** Bound inference requests to a single visible region and a practical source length. */
+function isWithinViewport(rect: SelectionRect, viewport: ViewportSize): boolean {
+  return (
+    rect.width >= 12 &&
+    rect.height >= 12 &&
+    rect.x + rect.width <= viewport.width + 1 &&
+    rect.y + rect.height <= viewport.height + 1
+  );
+}
+
+function isSourceText(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.length <= 2000;
 }

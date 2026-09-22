@@ -1,12 +1,57 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import type { OperationResult, StatusResult } from '../shared/messages';
+import { isContentMessage, type OperationResult, type StatusResult } from '../shared/messages';
 
 type PreparationState = 'idle' | 'preparing' | 'ready' | 'error';
 
 export function App() {
   const [state, setState] = useState<PreparationState>('idle');
   const [error, setError] = useState('');
+  const activeRequest = useRef<string | null>(null);
+  const [progress, setProgress] = useState<number | undefined>();
+  const [stage, setStage] = useState('Preparing local models');
+
+  // Reopened settings can reattach to setup without keeping an abandoned response channel.
+  useEffect(() => {
+    if (state !== 'preparing') return;
+    let active = true;
+    const timer = setInterval(() => {
+      void chrome.runtime
+        .sendMessage({ target: 'background', type: 'GET_STATUS' })
+        .then((result: StatusResult) => {
+          if (!active || result.preparationSessionId) return;
+          activeRequest.current = null;
+          setState(result.modelsReady ? 'ready' : result.lastError ? 'error' : 'idle');
+          setError(result.lastError ?? '');
+        })
+        .catch(() => undefined);
+    }, 2000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [state]);
+
+  useEffect(() => {
+    const listener = (message: unknown) => {
+      if (
+        !isContentMessage(message) ||
+        message.type !== 'PROCESS_PROGRESS' ||
+        message.sessionId !== activeRequest.current
+      )
+        return;
+      setProgress(message.progress);
+      setStage(
+        message.stage === 'preparing-ocr'
+          ? 'Loading OCR engine'
+          : 'Downloading or loading translation assets',
+      );
+    };
+    chrome.runtime.onMessage.addListener(listener);
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -16,7 +61,12 @@ export function App() {
         type: 'GET_STATUS',
       })
       .then((result: StatusResult) => {
-        if (!active) return;
+        if (!active || activeRequest.current) return;
+        if (result.preparationSessionId) {
+          activeRequest.current = result.preparationSessionId;
+          setState('preparing');
+          return;
+        }
         setState(result.modelsReady ? 'ready' : result.lastError ? 'error' : 'idle');
         setError(result.lastError ?? '');
       })
@@ -33,6 +83,9 @@ export function App() {
 
   /** Starts local model preparation and always restores the UI from its loading state. */
   async function prepareModels() {
+    const id = crypto.randomUUID();
+    activeRequest.current = id;
+    setProgress(undefined);
     setState('preparing');
     setError('');
 
@@ -40,9 +93,11 @@ export function App() {
       const result = (await chrome.runtime.sendMessage({
         target: 'background',
         type: 'PREPARE_MODELS',
-        sessionId: crypto.randomUUID(),
+        sessionId: id,
       })) as OperationResult;
 
+      if (activeRequest.current !== id) return;
+      activeRequest.current = null;
       if (result.ok) {
         setState('ready');
         return;
@@ -51,8 +106,29 @@ export function App() {
       setState('error');
       setError(result.error);
     } catch {
+      if (activeRequest.current !== id) return;
+      activeRequest.current = null;
       setState('error');
       setError('Croppa lost contact with its local processor. Reload the extension and try again.');
+    }
+  }
+
+  /** Stops the offscreen engine so cancellation actually aborts pending downloads. */
+  async function cancelPreparation() {
+    const id = activeRequest.current;
+    if (!id) return;
+    activeRequest.current = null;
+    try {
+      await chrome.runtime.sendMessage({
+        target: 'background',
+        type: 'CANCEL_SESSION',
+        sessionId: id,
+      });
+      setState('idle');
+      setError('Preparation cancelled. Completed model files may remain cached for retry.');
+    } catch {
+      setState('error');
+      setError('Could not cancel preparation. Reload the extension to stop its processor.');
     }
   }
 
@@ -71,11 +147,27 @@ export function App() {
         <div>
           <h2 id="model-heading">Local models</h2>
           <p className="muted">
-            The first preparation can take several minutes and download a sizeable translation
-            model. Later captures reuse the browser cache.
+            The first preparation can take several minutes and download a sizeable translation model
+            from Hugging Face. The exact total download size is currently unknown; allow several
+            hundred MB of free disk space. Later captures reuse the browser cache. OCR data is
+            bundled. Tesseract.js is Apache-2.0 licensed; the OPUS-MT base model is CC BY 4.0,
+            credited to the University of Helsinki with ONNX conversion by Xenova; see the
+            repository third-party notices for details.
           </p>
         </div>
         <StatusPill state={state} />
+        {state === 'preparing' && (
+          <div role="status" aria-live="polite">
+            <p>
+              {stage}
+              {progress === undefined ? '...' : `: ${Math.round(progress * 100)}% of current asset`}
+            </p>
+            <progress max={1} value={progress} aria-label={stage} />
+            <button className="primary-button" onClick={() => void cancelPreparation()}>
+              Cancel preparation
+            </button>
+          </div>
+        )}
         <button
           className="primary-button"
           type="button"
@@ -118,6 +210,9 @@ export function App() {
           session.
         </p>
       </section>
+      <p className="muted">
+        Croppa {chrome.runtime.getManifest().version} · Simplified Chinese → English
+      </p>
     </main>
   );
 }

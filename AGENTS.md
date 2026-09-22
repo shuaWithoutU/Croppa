@@ -39,6 +39,9 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 - Route browser-specific behavior through small adapters or guarded feature detection so Chrome and Opera GX differences remain localized.
 - Keep captured image data out of global state and persistent stores. Pass it only through the active processing request.
 - Use stable request/session identifiers to prevent late asynchronous results from replacing a newer capture.
+- Hide the complete Croppa host and wait for paint before capturing, including Retry. Do not render progress over the source until screenshot acquisition has finished.
+- Keep only one inference operation active across the extension; reject competing work instead of queuing private captures. Cancellation must verify the owning tab or settings context.
+- Release OCR worker-held image buffers after recognition and clear capture canvases. Do not assume dropping the canvas alone clears the OCR runtime's last image.
 
 ## UI and UX preferences and patterns
 
@@ -50,6 +53,8 @@ These instructions extend `D:/PersonalProjects/AGENTS.md` for work inside the Cr
 - Keep selection, processing, success, and error feedback close to the selected region so the user does not lose context.
 - Keep all controls after region selection keyboard operable, visibly focused, properly labelled, and readable at WCAG 2.2 AA contrast.
 - Errors must be concise and actionable. Never expose stack traces or captured content to users.
+- Failed OCR must allow manual source entry. Report clipboard failure honestly, and keep internal card scrolling separate from page-scroll dismissal.
+- Model-download percentages describe the current asset. Normalize Transformers' 0–100 progress separately from Tesseract's 0–1 progress.
 - Isolate injected UI from webpage styles and scripts with Shadow DOM, while keeping the popup and options pages visually consistent with the in-page overlay.
 
 ## Function comments

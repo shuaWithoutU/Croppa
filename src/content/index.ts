@@ -24,6 +24,9 @@ let host: HTMLDivElement | undefined;
 let shadow: ShadowRoot | undefined;
 let session: ActiveSession | undefined;
 let dragStart: Point | undefined;
+let previousFocus: HTMLElement | null = null;
+let capturePending = false;
+let operationId: string | undefined;
 
 chrome.runtime.onMessage.addListener((message: unknown) => {
   if (!isContentMessage(message)) {
@@ -32,19 +35,24 @@ chrome.runtime.onMessage.addListener((message: unknown) => {
 
   if (message.type === 'START_SELECTION') {
     beginSelection();
-  } else if (session?.id === message.sessionId) {
+  } else if (session?.id === message.sessionId && operationId === message.sessionId) {
+    capturePending = false;
+    if (host) host.style.visibility = 'visible';
     renderProcessing(message.stage, message.progress);
   }
 
   return false;
 });
 
+/** Replaces the old session and isolates selection controls from the page. */
 function beginSelection(): void {
   cleanup();
+  previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   session = undefined;
   host = document.createElement('div');
   host.id = HOST_ID;
-  host.style.cssText = 'all: initial; position: fixed; inset: 0; z-index: 2147483647;';
+  host.style.cssText =
+    'all: initial; position: fixed; inset: 0; z-index: 2147483647; pointer-events: none;';
   shadow = host.attachShadow({ mode: 'closed' });
   shadow.append(createStyles(), createSelectionLayer());
   document.documentElement.append(host);
@@ -101,7 +109,6 @@ function createSelectionLayer(): HTMLElement {
     };
     session = activeSession;
     layer.remove();
-    renderProcessing('capturing');
     addViewportCleanupListeners();
     void requestCapture(activeSession);
   });
@@ -109,27 +116,50 @@ function createSelectionLayer(): HTMLElement {
   return layer;
 }
 
+/** Hides all Croppa pixels for two paint frames before asking the browser to capture. */
 async function requestCapture(activeSession: ActiveSession): Promise<void> {
+  if (capturePending) return;
+  activeSession.id = crypto.randomUUID();
+  const requestId = activeSession.id;
+  operationId = requestId;
+  activeSession.sourceText = undefined;
+  activeSession.translatedText = undefined;
+  capturePending = true;
+  if (host) host.style.visibility = 'hidden';
   try {
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+    if (session?.id !== requestId) return;
     const result = (await chrome.runtime.sendMessage({
       target: 'background',
       type: 'CAPTURE_REGION',
-      sessionId: activeSession.id,
+      sessionId: requestId,
       rect: activeSession.rect,
       viewport: {
         width: window.innerWidth,
         height: window.innerHeight,
       },
     })) as OperationResult;
-    handleOperationResult(activeSession.id, result);
+    if (session?.id !== requestId) return;
+    capturePending = false;
+    if (host) host.style.visibility = 'visible';
+    handleOperationResult(requestId, result);
   } catch {
+    if (session?.id !== requestId) return;
+    capturePending = false;
+    if (host) host.style.visibility = 'visible';
     renderError('Croppa could not capture this page. Reload it and try again.');
   }
 }
 
+/** Retranslates edited Chinese in memory without recapturing the page. */
 async function requestTranslation(sourceText: string): Promise<void> {
   if (!session) return;
+  if (!sourceText.trim()) return;
+  session.id = crypto.randomUUID();
   const sessionId = session.id;
+  operationId = sessionId;
   renderProcessing('translating');
 
   try {
@@ -141,14 +171,19 @@ async function requestTranslation(sourceText: string): Promise<void> {
     })) as OperationResult;
     handleOperationResult(sessionId, result);
   } catch {
+    if (session?.id !== sessionId) return;
     renderError('Croppa could not translate the corrected text.');
   }
 }
 
+/** Rejects stale responses and drops source/translation state on terminal failure. */
 function handleOperationResult(sessionId: string, result: OperationResult): void {
   if (!session || session.id !== sessionId) return;
+  operationId = undefined;
 
   if (!result.ok) {
+    session.sourceText = undefined;
+    session.translatedText = undefined;
     renderError(result.error);
     return;
   }
@@ -198,8 +233,9 @@ function renderResult(result: ProcessResult): void {
   });
 }
 
+/** Lets users recover from recognition failures without uploading or recapturing text. */
 function renderSourceEditor(): void {
-  if (!session?.sourceText) return;
+  if (!session) return;
   replaceCardContent((card) => {
     const label = document.createElement('label');
     label.className = 'croppa-label';
@@ -211,11 +247,21 @@ function renderSourceEditor(): void {
     textarea.className = 'croppa-editor';
     textarea.value = session?.sourceText ?? '';
     textarea.rows = 4;
+    textarea.maxLength = 2000;
 
     const actions = document.createElement('div');
     actions.className = 'croppa-actions';
+    const translateButton = createButton(
+      'Translate',
+      () => void requestTranslation(textarea.value),
+      'primary',
+    );
+    translateButton.disabled = !textarea.value.trim();
+    textarea.addEventListener('input', () => {
+      translateButton.disabled = !textarea.value.trim();
+    });
     actions.append(
-      createButton('Translate', () => void requestTranslation(textarea.value), 'primary'),
+      translateButton,
       createButton('Cancel', () => {
         if (session?.sourceText && session.translatedText) {
           renderResult({
@@ -224,7 +270,7 @@ function renderSourceEditor(): void {
             translatedText: session.translatedText,
             durationMs: 0,
           });
-        }
+        } else renderError('Enter Chinese text manually or retry the selection.');
       }),
     );
     card.append(label, textarea, actions);
@@ -233,6 +279,11 @@ function renderSourceEditor(): void {
 }
 
 function renderError(message: string): void {
+  operationId = undefined;
+  if (session) {
+    session.sourceText = undefined;
+    session.translatedText = undefined;
+  }
   replaceCardContent((card) => {
     card.setAttribute('role', 'alert');
     const title = document.createElement('strong');
@@ -244,20 +295,27 @@ function renderError(message: string): void {
     actions.className = 'croppa-actions';
     actions.append(
       createButton('Retry', () => session && void requestCapture(session), 'primary'),
+      createButton('Edit source', renderSourceEditor),
       createButton('Close', cleanup),
     );
     card.append(title, detail, actions);
   });
 }
 
+/** Replaces one card while preserving the focused action when it still exists. */
 function replaceCardContent(fill: (card: HTMLElement) => void): void {
   if (!shadow || !session) return;
+  const focusedLabel = (shadow.activeElement as HTMLElement | null)?.textContent;
   shadow.querySelector('.croppa-card')?.remove();
   const card = document.createElement('section');
   card.className = 'croppa-card';
   positionCard(card, session.rect);
   fill(card);
   shadow.append(card);
+  const buttons = Array.from(card.querySelectorAll<HTMLButtonElement>('button'));
+  (buttons.find((button) => button.textContent === focusedLabel) ?? buttons[0])?.focus({
+    preventScroll: true,
+  });
 }
 
 function positionCard(card: HTMLElement, rect: SelectionRect): void {
@@ -274,6 +332,7 @@ function positionCard(card: HTMLElement, rect: SelectionRect): void {
   card.style.top = `${top}px`;
   card.style.width = `${width}px`;
   card.style.minHeight = `${height}px`;
+  card.style.maxHeight = `${window.innerHeight - top - margin}px`;
 }
 
 function createButton(
@@ -289,23 +348,33 @@ function createButton(
   return button;
 }
 
+/** Copies only English and confines the fallback field to the closed shadow root. */
 async function copyTranslation(text: string): Promise<void> {
+  const sessionId = session?.id;
+  let copied: boolean;
   try {
     await navigator.clipboard.writeText(text);
+    copied = true;
   } catch {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
-    document.body.append(textarea);
+    shadow?.append(textarea);
     textarea.select();
-    document.execCommand('copy');
-    textarea.remove();
+    try {
+      copied = document.execCommand('copy');
+    } catch {
+      copied = false;
+    } finally {
+      textarea.remove();
+    }
   }
-
+  if (session?.id !== sessionId) return;
   const copyButton = shadow?.querySelector<HTMLButtonElement>('.croppa-button--primary');
   if (copyButton) {
-    copyButton.textContent = 'Copied';
+    copyButton.textContent = copied ? 'Copied' : 'Copy failed — select text';
+    copyButton.setAttribute('aria-live', 'polite');
     setTimeout(() => {
       copyButton.textContent = 'Copy';
     }, 1200);
@@ -314,6 +383,7 @@ async function copyTranslation(text: string): Promise<void> {
 
 function getStageLabel(stage: ProcessingStage, progress?: number): string {
   const labels: Record<ProcessingStage, string> = {
+    downloading: 'Loading translation model...',
     capturing: 'Capturing selection…',
     'preparing-ocr': 'Preparing local OCR…',
     recognizing: 'Reading Chinese text…',
@@ -338,19 +408,36 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 function addViewportCleanupListeners(): void {
-  window.addEventListener('scroll', cleanup, { capture: true, once: true });
+  window.addEventListener('scroll', handleScroll, true);
   window.addEventListener('resize', cleanup, { once: true });
+  window.addEventListener('pagehide', cleanup, { once: true });
 }
 
+/** Ignore scrolling inside the card, but dismiss a selection whose page coordinates moved. */
+function handleScroll(event: Event): void {
+  if (event.composedPath().includes(host!)) return;
+  cleanup();
+}
+
+/** Cancels in-flight processing and releases all page-side session references. */
 function cleanup(): void {
+  if (session)
+    void chrome.runtime
+      .sendMessage({ target: 'background', type: 'CANCEL_SESSION', sessionId: session.id })
+      .catch(() => undefined);
   window.removeEventListener('keydown', handleKeydown, true);
-  window.removeEventListener('scroll', cleanup, true);
+  window.removeEventListener('scroll', handleScroll, true);
   window.removeEventListener('resize', cleanup);
+  window.removeEventListener('pagehide', cleanup);
   host?.remove();
   host = undefined;
   shadow = undefined;
   dragStart = undefined;
   session = undefined;
+  capturePending = false;
+  operationId = undefined;
+  previousFocus?.focus({ preventScroll: true });
+  previousFocus = null;
 }
 
 function createStyles(): HTMLStyleElement {
@@ -359,6 +446,7 @@ function createStyles(): HTMLStyleElement {
     :host { color-scheme: light dark; }
     * { box-sizing: border-box; }
     .croppa-selection-layer {
+      pointer-events: auto;
       position: fixed; inset: 0; cursor: crosshair; touch-action: none;
       background: rgb(10 18 32 / 32%); font: 500 14px/1.4 system-ui, sans-serif;
     }
@@ -379,7 +467,7 @@ function createStyles(): HTMLStyleElement {
       font: 500 14px/1.5 system-ui, sans-serif; pointer-events: auto;
     }
     .croppa-translation, .croppa-error, .croppa-meta { margin: 0; white-space: pre-wrap; }
-    .croppa-translation { flex: 1; font-size: 16px; }
+    .croppa-translation { flex: 1; font-size: 16px; overflow-wrap: anywhere; }
     .croppa-meta { color: #667085; font-size: 12px; }
     .croppa-error { color: #b42318; }
     .croppa-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto; }
@@ -389,6 +477,7 @@ function createStyles(): HTMLStyleElement {
       cursor: pointer;
     }
     .croppa-button:hover { background: #e9edf3; }
+    .croppa-button:disabled { opacity: .6; cursor: not-allowed; }
     .croppa-button:focus-visible, .croppa-editor:focus-visible { outline: 3px solid #84adff; outline-offset: 2px; }
     .croppa-button--primary { border-color: #155eef; background: #155eef; color: #fff; }
     .croppa-button--primary:hover { background: #004eeb; }
@@ -411,7 +500,7 @@ function createStyles(): HTMLStyleElement {
       .croppa-button--primary { border-color: #528bff; background: #2970ff; }
       .croppa-editor { border-color: #667085; background: #101828; color: #f9fafb; }
     }
-    @media (prefers-reduced-motion: reduce) { .croppa-spinner { animation-duration: 1.8s; } }
+    @media (prefers-reduced-motion: reduce) { .croppa-spinner { animation: none; } }
   `;
   return style;
 }
